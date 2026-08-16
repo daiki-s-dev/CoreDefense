@@ -47,5 +47,11 @@ TagManager:
   - name: MapObject
     uniqueID: 2739651427
     locked: 0
+  - name: Enemy
+    uniqueID: 1495575699
+    locked: 0
+  - name: Tower
+    uniqueID: 3666620589
+    locked: 0
   m_RenderingLayers:
   - Default
