@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 /// <summary>
 /// タワーを建設できる場所を管理する。
@@ -53,17 +52,31 @@ public class TowerPlacementPoint : MonoBehaviour
     /// </summary>
     private void OnMouseDown()
     {
-        // UIの上をクリックしている場合は無視
-        if (EventSystem.current != null &&
-            EventSystem.current.IsPointerOverGameObject())
+        Debug.Log(
+            $"TowerPlacementPoint: {gameObject.name} がクリックされました。"
+        );
+
+
+        // すでにタワーがある場合
+        if (isOccupied)
         {
+            Debug.Log(
+                "TowerPlacementPoint: すでにタワーが建設されています。"
+            );
+
             return;
         }
 
 
-        // すでにタワーがある場合は何もしない
-        if (isOccupied)
+        // UIが開いている場合はクリックしない
+        if (TowerBuildUI.IsUIOpen)
+        {
+            Debug.Log(
+                "TowerPlacementPoint: UIが開いているため無視しました。"
+            );
+
             return;
+        }
 
 
         if (TowerPlacementManager.Instance == null)
@@ -76,12 +89,9 @@ public class TowerPlacementPoint : MonoBehaviour
         }
 
 
-        // UIが開いている間は無視
-        if (TowerPlacementManager.Instance.IsUIOpen)
-            return;
-
-
-        TowerPlacementManager.Instance.OpenBuildUI(this);
+        TowerPlacementManager.Instance.OpenBuildUI(
+            this
+        );
     }
 
 
@@ -108,7 +118,6 @@ public class TowerPlacementPoint : MonoBehaviour
 
 
         // 建設地点自身のColliderを無効化
-        // タワーのColliderでクリックできるようにする
         if (pointCollider != null)
         {
             pointCollider.enabled = false;
@@ -143,7 +152,9 @@ public class TowerPlacementPoint : MonoBehaviour
     {
         if (availableIndicator != null)
         {
-            availableIndicator.SetActive(!isOccupied);
+            availableIndicator.SetActive(
+                !isOccupied
+            );
         }
     }
 }
