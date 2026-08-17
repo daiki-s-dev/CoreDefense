@@ -95,7 +95,12 @@ public class TowerBuildUI : MonoBehaviour
     // =====================================================
 
     [Header("所持金")]
-    public TMP_Text moneyText;
+
+    [Tooltip("建設モードに表示する所持金")]
+    public TMP_Text buildModeMoneyText;
+
+    [Tooltip("タワー管理モードに表示する所持金")]
+    public TMP_Text towerModeMoneyText;
 
 
     // =====================================================
@@ -305,6 +310,26 @@ public class TowerBuildUI : MonoBehaviour
     }
 
 
+    // =====================================================
+    // 更新
+    // =====================================================
+
+    private void Update()
+    {
+        // UIが開いていない場合は更新しない
+        if (!IsUIOpen)
+            return;
+
+
+        // 所持金をリアルタイム更新
+        UpdateMoneyDisplay();
+    }
+
+
+    // =====================================================
+    // 開始
+    // =====================================================
+
     private void Start()
     {
         Hide();
@@ -364,6 +389,8 @@ public class TowerBuildUI : MonoBehaviour
 
         ClearMessage();
 
+
+        // 所持金を更新
         UpdateMoneyDisplay();
     }
 
@@ -580,6 +607,10 @@ public class TowerBuildUI : MonoBehaviour
         TowerPlacementManager.Instance.BuildTower(
             selectedTowerData
         );
+
+
+        // 建設後に所持金を更新
+        UpdateMoneyDisplay();
     }
 
 
@@ -823,10 +854,13 @@ public class TowerBuildUI : MonoBehaviour
         if (towerCloseButton != null)
         {
             towerCloseButton.gameObject.SetActive(true);
-            towerCloseButton.interactable = true;
+
+            towerCloseButton.interactable =
+                true;
         }
 
 
+        // 所持金を更新
         UpdateMoneyDisplay();
     }
 
@@ -905,6 +939,10 @@ public class TowerBuildUI : MonoBehaviour
 
         TowerPlacementManager.Instance
             .UpgradeSelectedTower();
+
+
+        // 強化後に所持金を更新
+        UpdateMoneyDisplay();
     }
 
 
@@ -920,6 +958,10 @@ public class TowerBuildUI : MonoBehaviour
 
         TowerPlacementManager.Instance
             .SellSelectedTower();
+
+
+        // 売却後に所持金を更新
+        UpdateMoneyDisplay();
     }
 
 
@@ -979,23 +1021,52 @@ public class TowerBuildUI : MonoBehaviour
     // 所持金
     // =====================================================
 
+    /// <summary>
+    /// 建設モード・タワー管理モードの
+    /// 所持金表示を更新する。
+    /// </summary>
     private void UpdateMoneyDisplay()
     {
-        if (moneyText == null)
-            return;
-
-
+        // ResourceManagerが存在しない場合
         if (ResourceManager.Instance == null)
         {
-            moneyText.text =
-                "所持金：---";
+            if (buildModeMoneyText != null)
+            {
+                buildModeMoneyText.text =
+                    "所持金：---";
+            }
+
+
+            if (towerModeMoneyText != null)
+            {
+                towerModeMoneyText.text =
+                    "所持金：---";
+            }
+
 
             return;
         }
 
 
-        moneyText.text =
+        // 現在の所持金
+        string moneyText =
             $"所持金：{ResourceManager.Instance.CurrentMoney}";
+
+
+        // 建設モード
+        if (buildModeMoneyText != null)
+        {
+            buildModeMoneyText.text =
+                moneyText;
+        }
+
+
+        // タワー管理モード
+        if (towerModeMoneyText != null)
+        {
+            towerModeMoneyText.text =
+                moneyText;
+        }
     }
 
 
@@ -1034,7 +1105,8 @@ public class TowerBuildUI : MonoBehaviour
     {
         if (messageText != null)
         {
-            messageText.text = "";
+            messageText.text =
+                "";
         }
     }
 }

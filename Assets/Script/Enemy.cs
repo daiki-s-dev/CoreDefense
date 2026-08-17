@@ -23,6 +23,14 @@ public class Enemy : MonoBehaviour
 
 
     // =====================================================
+    // •ñVİ’è
+    // =====================================================
+    [Header("Œ‚”j•ñV")]
+    [Tooltip("‚±‚Ì“G‚ğ“|‚µ‚½‚Æ‚«‚ÉŠl“¾‚·‚é‚¨‹à")]
+    public int killReward = 10;
+
+
+    // =====================================================
     // ˆÚ“®İ’è
     // =====================================================
 
@@ -354,6 +362,32 @@ public class Enemy : MonoBehaviour
             return;
 
 
+        // =================================================
+        // Œ‚”j•ñV
+        // =================================================
+
+        if (ResourceManager.Instance != null)
+        {
+            ResourceManager.Instance.AddMoney(
+                killReward
+            );
+
+            Debug.Log(
+                $"{gameObject.name} ‚ÌŒ‚”j•ñV‚Æ‚µ‚Ä " +
+                $"{killReward}G Šl“¾‚µ‚Ü‚µ‚½B"
+            );
+        }
+        else
+        {
+            Debug.LogWarning(
+                "ResourceManager‚ª‘¶İ‚µ‚È‚¢‚½‚ßA" +
+                "Œ‚”j•ñV‚ğó‚¯æ‚ê‚Ü‚¹‚ñ‚Å‚µ‚½B",
+                this
+            );
+        }
+
+
+        // €–Sˆ—Š®—¹
         FinishDeath();
     }
 
