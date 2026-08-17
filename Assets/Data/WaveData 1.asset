@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbeae3447041a93439b02ffdab80bfa3, type: 3}
+  m_Name: WaveData 1
+  m_EditorClassIdentifier: 
+  waveName: Wave 1
+  startDelay: 2
+  endDelay: 3
+  useNorth: 1
+  useSouth: 0
+  useEast: 0
+  useWest: 0
+  enemyGroups:
+  - enemyPrefabs:
+    - {fileID: 4480682840864639223, guid: 498ca4da4effb1249922b847efe050d1, type: 3}
+    enemyCount: 10
+    spawnInterval: 2

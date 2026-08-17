@@ -2,11 +2,18 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// タワーの攻撃・レベル・強化・売却を管理する。
-/// 範囲内で最も進んでいる敵を攻撃する。
+/// タワーの攻撃・レベル・強化・売却・見た目を管理する。
+///
+/// ・CircleCollider2D → 攻撃範囲・敵検知専用
+/// ・TowerClickArea → クリック専用
+/// ・レベル別Prefab → 見た目専用
 /// </summary>
 public class Tower : MonoBehaviour
 {
+    // =====================================================
+    // タワーデータ
+    // =====================================================
+
     [Header("タワーデータ")]
     public TowerData towerData;
 
@@ -15,6 +22,7 @@ public class Tower : MonoBehaviour
     // レベル
     // =====================================================
 
+    [Header("レベル")]
     [SerializeField]
     private int level = 1;
 
@@ -51,7 +59,20 @@ public class Tower : MonoBehaviour
     // Collider
     // =====================================================
 
+    // 攻撃範囲専用
     private CircleCollider2D rangeCollider;
+
+
+    // =====================================================
+    // 見た目
+    // =====================================================
+
+    [Header("見た目")]
+    [Tooltip("レベル別Prefabを生成する親")]
+    public Transform visualRoot;
+
+    // 現在表示している見た目
+    private GameObject currentVisual;
 
 
     // =====================================================
@@ -71,11 +92,15 @@ public class Tower : MonoBehaviour
 
 
     // =====================================================
-    // 初期化
+    // Unity
     // =====================================================
 
     private void Awake()
     {
+        // ---------------------------------------------
+        // 攻撃範囲Collider取得
+        // ---------------------------------------------
+
         rangeCollider =
             GetComponent<CircleCollider2D>();
 
@@ -83,7 +108,8 @@ public class Tower : MonoBehaviour
         if (rangeCollider == null)
         {
             Debug.LogError(
-                $"{gameObject.name}: Circle Collider 2Dがありません。",
+                $"{gameObject.name}: " +
+                "Tower本体にCircle Collider 2Dがありません。",
                 this
             );
 
@@ -91,23 +117,28 @@ public class Tower : MonoBehaviour
         }
 
 
+        // 攻撃範囲なのでTrigger
         rangeCollider.isTrigger = true;
 
 
-        ApplyStats();
+        // visualRootが設定されていない場合
+        if (visualRoot == null)
+        {
+            Debug.LogWarning(
+                $"{gameObject.name}: " +
+                "Visual Rootが設定されていません。",
+                this
+            );
+        }
+
+
+        // towerDataがPrefab側に設定されている場合のみ
+        if (towerData != null)
+        {
+            InitializeTower();
+        }
     }
 
-
-    private void Start()
-    {
-        // 初期レベルの見た目を適用
-        UpdateVisual();
-    }
-
-
-    // =====================================================
-    // Update
-    // =====================================================
 
     private void Update()
     {
@@ -134,54 +165,69 @@ public class Tower : MonoBehaviour
 
 
     // =====================================================
-    // クリック
+    // 初期化
     // =====================================================
 
-    private void OnMouseDown()
+    /// <summary>
+    /// TowerPlacementManagerからTowerDataを設定した後に呼び出す。
+    /// </summary>
+    public void InitializeTower()
     {
-        // UIが開いている間は
-        // タワーをクリックできないようにする
-        if (TowerBuildUI.IsUIOpen)
+        if (towerData == null)
+        {
+            Debug.LogError(
+                $"{gameObject.name}: TowerDataが設定されていません。",
+                this
+            );
+
             return;
+        }
 
 
-        if (TowerPlacementManager.Instance == null)
-            return;
+        // ステータスを適用
+        ApplyStats();
 
 
-        TowerPlacementManager.Instance.OpenTowerUI(
-            this
-        );
+        // レベル1の見た目を生成
+        UpdateVisual();
     }
 
 
     // =====================================================
-    // ステータス計算
+    // ステータス
     // =====================================================
 
+    /// <summary>
+    /// 現在のレベルに応じてステータスを計算する。
+    /// </summary>
     private void ApplyStats()
     {
         if (towerData == null)
             return;
 
 
+        // 攻撃力
         currentAttackDamage =
             towerData.attackDamage
-            + towerData.upgradeDamage * (level - 1);
+            + towerData.upgradeDamage
+            * (level - 1);
 
 
+        // 射程
         currentAttackRange =
             towerData.attackRange
-            + towerData.upgradeRange * (level - 1);
+            + towerData.upgradeRange
+            * (level - 1);
 
 
+        // 攻撃間隔
         currentAttackInterval =
             towerData.attackInterval
             - towerData.upgradeIntervalReduction
             * (level - 1);
 
 
-        // 0.1秒未満にならないようにする
+        // 0.1秒未満にはしない
         currentAttackInterval =
             Mathf.Max(
                 0.1f,
@@ -189,6 +235,7 @@ public class Tower : MonoBehaviour
             );
 
 
+        // 攻撃範囲Colliderを更新
         if (rangeCollider != null)
         {
             rangeCollider.radius =
@@ -201,6 +248,9 @@ public class Tower : MonoBehaviour
     // 強化
     // =====================================================
 
+    /// <summary>
+    /// タワーを1レベル強化する。
+    /// </summary>
     public bool Upgrade()
     {
         if (towerData == null)
@@ -228,43 +278,46 @@ public class Tower : MonoBehaviour
 
 
     // =====================================================
-    // 次のレベルの攻撃力
+    // 次のレベルのステータス
     // =====================================================
 
     public int GetNextAttackDamage()
     {
         if (towerData == null)
-            return currentAttackDamage;
+            return 0;
 
 
-        if (level >= towerData.maxLevel)
-            return currentAttackDamage;
+        int nextLevel =
+            Mathf.Min(
+                level + 1,
+                towerData.maxLevel
+            );
 
 
         return
             towerData.attackDamage
-            + towerData.upgradeDamage * level;
+            + towerData.upgradeDamage
+            * (nextLevel - 1);
     }
 
-
-    // =====================================================
-    // 次のレベルの攻撃間隔
-    // =====================================================
 
     public float GetNextAttackInterval()
     {
         if (towerData == null)
-            return currentAttackInterval;
+            return 0f;
 
 
-        if (level >= towerData.maxLevel)
-            return currentAttackInterval;
+        int nextLevel =
+            Mathf.Min(
+                level + 1,
+                towerData.maxLevel
+            );
 
 
         float nextInterval =
             towerData.attackInterval
             - towerData.upgradeIntervalReduction
-            * level;
+            * (nextLevel - 1);
 
 
         return Mathf.Max(
@@ -274,28 +327,108 @@ public class Tower : MonoBehaviour
     }
 
 
-    // =====================================================
-    // 次のレベルの射程
-    // =====================================================
-
     public float GetNextAttackRange()
     {
         if (towerData == null)
-            return currentAttackRange;
+            return 0f;
 
 
-        if (level >= towerData.maxLevel)
-            return currentAttackRange;
+        int nextLevel =
+            Mathf.Min(
+                level + 1,
+                towerData.maxLevel
+            );
 
 
         return
             towerData.attackRange
-            + towerData.upgradeRange * level;
+            + towerData.upgradeRange
+            * (nextLevel - 1);
     }
 
 
     // =====================================================
-    // 強化費
+    // レベル別見た目
+    // =====================================================
+
+    /// <summary>
+    /// 現在のレベルに応じた見た目Prefabを生成する。
+    /// </summary>
+    private void UpdateVisual()
+    {
+        if (towerData == null)
+            return;
+
+
+        if (visualRoot == null)
+        {
+            Debug.LogWarning(
+                $"{gameObject.name}: " +
+                "VisualRootが設定されていないため、" +
+                "レベル別見た目を生成できません。",
+                this
+            );
+
+            return;
+        }
+
+
+        // ---------------------------------------------
+        // 古い見た目を削除
+        // ---------------------------------------------
+
+        if (currentVisual != null)
+        {
+            Destroy(currentVisual);
+            currentVisual = null;
+        }
+
+
+        // ---------------------------------------------
+        // レベル別Prefab取得
+        // ---------------------------------------------
+
+        GameObject visualPrefab =
+            towerData.GetLevelPrefab(level);
+
+
+        if (visualPrefab == null)
+        {
+            Debug.LogWarning(
+                $"{gameObject.name}: " +
+                $"Lv.{level}の見た目Prefabが設定されていません。",
+                this
+            );
+
+            return;
+        }
+
+
+        // ---------------------------------------------
+        // 見た目を生成
+        // ---------------------------------------------
+
+        currentVisual =
+            Instantiate(
+                visualPrefab,
+                visualRoot
+            );
+
+
+        // Transformを初期化
+        currentVisual.transform.localPosition =
+            Vector3.zero;
+
+        currentVisual.transform.localRotation =
+            Quaternion.identity;
+
+        currentVisual.transform.localScale =
+            Vector3.one;
+    }
+
+
+    // =====================================================
+    // 強化費用
     // =====================================================
 
     public int GetUpgradeCost()
@@ -309,7 +442,7 @@ public class Tower : MonoBehaviour
 
 
     // =====================================================
-    // 売却価格
+    // 売却
     // =====================================================
 
     public int GetSellPrice()
@@ -336,101 +469,7 @@ public class Tower : MonoBehaviour
 
 
     // =====================================================
-    // 見た目変更
-    // =====================================================
-
-    private void UpdateVisual()
-    {
-        if (towerData == null)
-            return;
-
-
-        GameObject prefab =
-            GetLevelPrefab();
-
-
-        if (prefab == null)
-        {
-            Debug.LogWarning(
-                $"TowerData「{towerData.towerName}」のLv.{level}用Prefabが設定されていません。",
-                this
-            );
-
-            return;
-        }
-
-
-        // 現在の見た目を削除
-        ClearVisual();
-
-
-        // 新しいPrefabを生成
-        GameObject visual =
-            Instantiate(
-                prefab,
-                transform.position,
-                Quaternion.identity,
-                transform
-            );
-
-
-        // 見た目PrefabのTransformを調整
-        visual.transform.localPosition =
-            Vector3.zero;
-
-        visual.transform.localRotation =
-            Quaternion.identity;
-
-        visual.transform.localScale =
-            Vector3.one;
-    }
-
-
-    // =====================================================
-    // レベルPrefab取得
-    // =====================================================
-
-    private GameObject GetLevelPrefab()
-    {
-        switch (level)
-        {
-            case 1:
-                return towerData.level1Prefab;
-
-            case 2:
-                return towerData.level2Prefab;
-
-            case 3:
-                return towerData.level3Prefab;
-
-            default:
-                return towerData.level3Prefab;
-        }
-    }
-
-
-    // =====================================================
-    // 現在の見た目削除
-    // =====================================================
-
-    private void ClearVisual()
-    {
-        // Tower本体の子オブジェクトを削除
-        for (int i = transform.childCount - 1;
-             i >= 0;
-             i--)
-        {
-            Transform child =
-                transform.GetChild(i);
-
-
-            Destroy(child.gameObject);
-        }
-    }
-
-
-    // =====================================================
-    // 敵が範囲内に入った
+    // 攻撃範囲
     // =====================================================
 
     private void OnTriggerEnter2D(
@@ -450,10 +489,6 @@ public class Tower : MonoBehaviour
         }
     }
 
-
-    // =====================================================
-    // 敵が範囲外に出た
-    // =====================================================
 
     private void OnTriggerExit2D(
         Collider2D other)
@@ -476,10 +511,6 @@ public class Tower : MonoBehaviour
     }
 
 
-    // =====================================================
-    // 無効な敵を削除
-    // =====================================================
-
     private void RemoveInvalidEnemies()
     {
         enemiesInRange.RemoveAll(
@@ -490,10 +521,6 @@ public class Tower : MonoBehaviour
     }
 
 
-    // =====================================================
-    // 最も進んでいる敵
-    // =====================================================
-
     private Enemy FindMostAdvancedEnemy()
     {
         Enemy bestEnemy = null;
@@ -503,9 +530,7 @@ public class Tower : MonoBehaviour
             float.MinValue;
 
 
-        foreach (
-            Enemy enemy
-            in enemiesInRange)
+        foreach (Enemy enemy in enemiesInRange)
         {
             if (enemy == null)
                 continue;
@@ -521,11 +546,8 @@ public class Tower : MonoBehaviour
 
             if (progress > bestProgress)
             {
-                bestProgress =
-                    progress;
-
-                bestEnemy =
-                    enemy;
+                bestProgress = progress;
+                bestEnemy = enemy;
             }
         }
 

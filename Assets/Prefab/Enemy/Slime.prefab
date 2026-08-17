@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 7663541672099078797}
   - component: {fileID: 3540024421713561710}
   - component: {fileID: 1218027789873094473}
+  - component: {fileID: 6615068241787009183}
   m_Layer: 0
   m_Name: Slime
   m_TagString: Untagged
@@ -108,7 +109,11 @@ MonoBehaviour:
   waypointReachDistance: 0.05
   damageToCore: 1
   waypointPath: {fileID: 0}
-  coreObject: {fileID: 0}
+  coreObject: {fileID: 3209344048830403304, guid: 2962f83bf0444f44ba750970f374021d, type: 3}
+  animator: {fileID: 1218027789873094473}
+  deathTriggerName: Die
+  damageFlashDuration: 0.1
+  damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!58 &7663541672099078797
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -194,3 +199,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6615068241787009183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4480682840864639223}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7f39f788938179439a1e3dc77f3211f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 1218027789873094473}
+  spriteRenderer: {fileID: 3719099041104607531}
+  damageFlashDuration: 0.1

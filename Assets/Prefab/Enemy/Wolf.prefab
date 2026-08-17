@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1233675252190936114}
   - component: {fileID: 2909978473924731368}
   - component: {fileID: 8971497582905769034}
+  - component: {fileID: 6983767702116907755}
   m_Layer: 0
   m_Name: Wolf
   m_TagString: Untagged
@@ -108,7 +109,11 @@ MonoBehaviour:
   waypointReachDistance: 0.05
   damageToCore: 1
   waypointPath: {fileID: 0}
-  coreObject: {fileID: 0}
+  coreObject: {fileID: 3209344048830403304, guid: 2962f83bf0444f44ba750970f374021d, type: 3}
+  animator: {fileID: 8971497582905769034}
+  deathTriggerName: Die
+  damageFlashDuration: 0.1
+  damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!58 &1233675252190936114
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -194,3 +199,18 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!114 &6983767702116907755
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8455779369675863484}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c7f39f788938179439a1e3dc77f3211f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 8971497582905769034}
+  spriteRenderer: {fileID: 935648010039190558}
+  damageFlashDuration: 0.1

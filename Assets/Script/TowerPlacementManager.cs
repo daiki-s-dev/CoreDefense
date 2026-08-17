@@ -1,40 +1,71 @@
 using UnityEngine;
 
 /// <summary>
-/// タワーの建設・強化・売却・UI選択を管理する。
+/// タワーの建設・強化・売却・クリック判定・UI選択を管理する。
+///
+/// クリック判定はOnMouseDownを使わず、
+/// 画面上のクリック位置からPhysics2D.Raycastを行う。
 /// </summary>
 public class TowerPlacementManager : MonoBehaviour
 {
     public static TowerPlacementManager Instance { get; private set; }
 
 
+    // =====================================================
+    // UI
+    // =====================================================
+
     [Header("UI")]
     public TowerBuildUI buildUI;
 
 
-    // 現在選択中の建設地点
+    // =====================================================
+    // クリック設定
+    // =====================================================
+
+    [Header("クリック判定")]
+
+    [Tooltip("タワークリック判定用Layer")]
+    public LayerMask towerClickLayer;
+
+    [Tooltip("建設地点クリック判定用Layer")]
+    public LayerMask placementPointLayer;
+
+
+    // =====================================================
+    // 選択状態
+    // =====================================================
+
+    // 選択中の建設地点
     private TowerPlacementPoint selectedPoint;
 
-
-    // 現在選択中のタワー
+    // 選択中のタワー
     private Tower selectedTower;
 
 
-    /// <summary>
-    /// UIが開いているか。
-    /// </summary>
+    // =====================================================
+    // UI状態
+    // =====================================================
+
     public bool IsUIOpen =>
         selectedPoint != null ||
         selectedTower != null;
 
 
+    // =====================================================
+    // Unity
+    // =====================================================
+
     private void Awake()
     {
-        if (Instance != null && Instance != this)
+        if (Instance != null &&
+            Instance != this)
         {
             Destroy(gameObject);
+
             return;
         }
+
 
         Instance = this;
     }
@@ -49,10 +80,119 @@ public class TowerPlacementManager : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 建設地点をクリックしたとき。
-    /// </summary>
-    public void OpenBuildUI(TowerPlacementPoint point)
+    private void Update()
+    {
+        HandleMouseClick();
+    }
+
+
+    // =====================================================
+    // クリック処理
+    // =====================================================
+
+    private void HandleMouseClick()
+    {
+        // 左クリックではない
+        if (!Input.GetMouseButtonDown(0))
+            return;
+
+
+        // UIをクリックしている場合
+        if (TowerBuildUI.IsUIOpen)
+            return;
+
+
+        // カメラ取得
+        Camera cam =
+            Camera.main;
+
+
+        if (cam == null)
+            return;
+
+
+        // マウス位置をワールド座標に変換
+        Vector3 mousePosition =
+            Input.mousePosition;
+
+
+        Vector3 worldPosition =
+            cam.ScreenToWorldPoint(
+                mousePosition
+            );
+
+
+        worldPosition.z = 0f;
+
+
+        // =================================================
+        // ① タワーを優先して検索
+        // =================================================
+
+        Collider2D towerHit =
+            Physics2D.OverlapPoint(
+                worldPosition,
+                towerClickLayer
+            );
+
+
+        if (towerHit != null)
+        {
+            TowerClickArea clickArea =
+                towerHit.GetComponent<TowerClickArea>();
+
+
+            if (clickArea != null)
+            {
+                Tower tower =
+                    clickArea.Tower;
+
+
+                if (tower != null)
+                {
+                    OpenTowerUI(tower);
+
+                    return;
+                }
+            }
+        }
+
+
+        // =================================================
+        // ② 建設地点を検索
+        // =================================================
+
+        Collider2D pointHit =
+            Physics2D.OverlapPoint(
+                worldPosition,
+                placementPointLayer
+            );
+
+
+        if (pointHit != null)
+        {
+            TowerPlacementPoint point =
+                pointHit.GetComponent<
+                    TowerPlacementPoint
+                >();
+
+
+            if (point != null)
+            {
+                OpenBuildUI(point);
+
+                return;
+            }
+        }
+    }
+
+
+    // =====================================================
+    // 建設地点UI
+    // =====================================================
+
+    public void OpenBuildUI(
+        TowerPlacementPoint point)
     {
         if (point == null)
             return;
@@ -63,6 +203,7 @@ public class TowerPlacementManager : MonoBehaviour
 
 
         selectedPoint = point;
+
         selectedTower = null;
 
 
@@ -73,30 +214,37 @@ public class TowerPlacementManager : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 建設済みタワーをクリックしたとき。
-    /// </summary>
-    public void OpenTowerUI(Tower tower)
+    // =====================================================
+    // タワーUI
+    // =====================================================
+
+    public void OpenTowerUI(
+        Tower tower)
     {
         if (tower == null)
             return;
 
 
         selectedTower = tower;
+
         selectedPoint = null;
 
 
         if (buildUI != null)
         {
-            buildUI.ShowTowerMode(tower);
+            buildUI.ShowTowerMode(
+                tower
+            );
         }
     }
 
 
-    /// <summary>
-    /// タワーを建設する。
-    /// </summary>
-    public void BuildTower(TowerData towerData)
+    // =====================================================
+    // 建設
+    // =====================================================
+
+    public void BuildTower(
+        TowerData towerData)
     {
         if (selectedPoint == null)
             return;
@@ -109,26 +257,27 @@ public class TowerPlacementManager : MonoBehaviour
         if (selectedPoint.IsOccupied)
         {
             CloseUI();
+
             return;
         }
 
 
-        // ResourceManager確認
         if (ResourceManager.Instance == null)
         {
             Debug.LogError(
-                "TowerPlacementManager: ResourceManagerが存在しません。"
+                "ResourceManagerが存在しません。"
             );
 
             return;
         }
 
 
-        // お金が足りるか確認
+        // お金確認
         if (!ResourceManager.Instance.CanAfford(
             towerData.buildCost))
         {
             buildUI?.ShowNotEnoughMoney();
+
             return;
         }
 
@@ -137,7 +286,8 @@ public class TowerPlacementManager : MonoBehaviour
         if (towerData.towerPrefab == null)
         {
             Debug.LogError(
-                $"TowerData「{towerData.towerName}」にTower Prefabが設定されていません。"
+                $"TowerData「{towerData.towerName}」に" +
+                "Tower Prefabが設定されていません。"
             );
 
             return;
@@ -152,15 +302,18 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
-        // タワー生成
-        GameObject towerObject = Instantiate(
-            towerData.towerPrefab,
-            selectedPoint.transform.position,
-            Quaternion.identity
-        );
+        // =================================================
+        // Tower生成
+        // =================================================
+
+        GameObject towerObject =
+            Instantiate(
+                towerData.towerPrefab,
+                selectedPoint.transform.position,
+                Quaternion.identity
+            );
 
 
-        // Tower取得
         Tower tower =
             towerObject.GetComponent<Tower>();
 
@@ -168,11 +321,10 @@ public class TowerPlacementManager : MonoBehaviour
         if (tower == null)
         {
             Debug.LogError(
-                "生成されたTower PrefabにTower.csがありません。"
+                "Tower PrefabにTower.csがありません。"
             );
 
 
-            // 建設失敗なので返金
             ResourceManager.Instance.AddMoney(
                 towerData.buildCost
             );
@@ -184,12 +336,19 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
-        // TowerDataを設定
-        tower.towerData = towerData;
+        // TowerData設定
+        tower.towerData =
+            towerData;
 
 
-        // 建設地点を使用済みにする
-        selectedPoint.SetOccupied(tower);
+        // Tower初期化
+        tower.InitializeTower();
+
+
+        // 建設地点登録
+        selectedPoint.SetOccupied(
+            tower
+        );
 
 
         // UIを閉じる
@@ -197,9 +356,10 @@ public class TowerPlacementManager : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 選択中のタワーを強化する。
-    /// </summary>
+    // =====================================================
+    // 強化
+    // =====================================================
+
     public void UpgradeSelectedTower()
     {
         if (selectedTower == null)
@@ -213,7 +373,7 @@ public class TowerPlacementManager : MonoBehaviour
         if (ResourceManager.Instance == null)
         {
             Debug.LogError(
-                "TowerPlacementManager: ResourceManagerが存在しません。"
+                "ResourceManagerが存在しません。"
             );
 
             return;
@@ -224,24 +384,26 @@ public class TowerPlacementManager : MonoBehaviour
             selectedTower.towerData;
 
 
-        // 最大レベル確認
-        if (selectedTower.Level >= data.maxLevel)
+        // 最大レベル
+        if (selectedTower.Level >=
+            data.maxLevel)
         {
             buildUI?.ShowMaxLevel();
+
             return;
         }
 
 
-        // 強化価格
         int upgradeCost =
             selectedTower.GetUpgradeCost();
 
 
-        // お金が足りるか確認
+        // お金確認
         if (!ResourceManager.Instance.CanAfford(
             upgradeCost))
         {
             buildUI?.ShowNotEnoughMoney();
+
             return;
         }
 
@@ -254,14 +416,13 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
-        // タワー強化
+        // 強化
         bool success =
             selectedTower.Upgrade();
 
 
         if (!success)
         {
-            // 強化失敗時は返金
             ResourceManager.Instance.AddMoney(
                 upgradeCost
             );
@@ -270,7 +431,7 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
-        // 強化後の情報をUIに反映
+        // UI更新
         if (buildUI != null)
         {
             buildUI.ShowTowerMode(
@@ -280,9 +441,10 @@ public class TowerPlacementManager : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 選択中のタワーを売却する。
-    /// </summary>
+    // =====================================================
+    // 売却
+    // =====================================================
+
     public void SellSelectedTower()
     {
         if (selectedTower == null)
@@ -292,60 +454,60 @@ public class TowerPlacementManager : MonoBehaviour
         if (ResourceManager.Instance == null)
         {
             Debug.LogError(
-                "TowerPlacementManager: ResourceManagerが存在しません。"
+                "ResourceManagerが存在しません。"
             );
 
             return;
         }
 
 
-        // 売却価格
         int sellPrice =
             selectedTower.GetSellPrice();
 
 
-        // 建設地点を探す
         TowerPlacementPoint point =
             FindPlacementPoint(
                 selectedTower.transform.position
             );
 
 
-        // タワーを破壊
-        Destroy(selectedTower.gameObject);
+        Destroy(
+            selectedTower.gameObject
+        );
 
 
-        // 建設地点を再利用可能にする
         if (point != null)
         {
             point.ResetPoint();
         }
 
 
-        // 売却額を加算
         ResourceManager.Instance.AddMoney(
             sellPrice
         );
 
 
-        // UIを閉じる
         CloseUI();
     }
 
 
-    /// <summary>
-    /// タワーの位置から最も近い建設地点を取得する。
-    /// </summary>
+    // =====================================================
+    // 建設地点検索
+    // =====================================================
+
     private TowerPlacementPoint FindPlacementPoint(
         Vector3 position)
     {
         TowerPlacementPoint[] points =
-            FindObjectsByType<TowerPlacementPoint>(
+            FindObjectsByType<
+                TowerPlacementPoint
+            >(
                 FindObjectsSortMode.None
             );
 
 
-        TowerPlacementPoint closestPoint = null;
+        TowerPlacementPoint closestPoint =
+            null;
 
 
         float closestDistance =
@@ -366,6 +528,7 @@ public class TowerPlacementManager : MonoBehaviour
             if (distance < closestDistance)
             {
                 closestDistance = distance;
+
                 closestPoint = point;
             }
         }
@@ -375,26 +538,27 @@ public class TowerPlacementManager : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 選択状態を解除する。
-    /// </summary>
+    // =====================================================
+    // 選択解除
+    // =====================================================
+
     public void ClearSelection()
     {
         selectedPoint = null;
+
         selectedTower = null;
     }
 
 
-    /// <summary>
-    /// UIを閉じる。
-    /// </summary>
+    // =====================================================
+    // UIを閉じる
+    // =====================================================
+
     public void CloseUI()
     {
-        // 選択状態を解除
         ClearSelection();
 
 
-        // UIを閉じる
         if (buildUI != null)
         {
             buildUI.Hide();

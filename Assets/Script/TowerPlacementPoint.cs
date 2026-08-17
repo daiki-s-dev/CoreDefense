@@ -14,24 +14,20 @@ public class TowerPlacementPoint : MonoBehaviour
     private bool isOccupied = false;
 
 
-    // この場所に建設されているタワー
+    // 建設されているタワー
     private Tower placedTower;
 
 
-    // 建設地点のCollider
+    // 建設地点Collider
     private Collider2D pointCollider;
 
 
-    /// <summary>
-    /// 現在タワーが建設されているか。
-    /// </summary>
-    public bool IsOccupied => isOccupied;
+    public bool IsOccupied =>
+        isOccupied;
 
 
-    /// <summary>
-    /// 現在建設されているタワー。
-    /// </summary>
-    public Tower PlacedTower => placedTower;
+    public Tower PlacedTower =>
+        placedTower;
 
 
     private void Awake()
@@ -48,54 +44,6 @@ public class TowerPlacementPoint : MonoBehaviour
 
 
     /// <summary>
-    /// 建設地点をクリックしたとき。
-    /// </summary>
-    private void OnMouseDown()
-    {
-        Debug.Log(
-            $"TowerPlacementPoint: {gameObject.name} がクリックされました。"
-        );
-
-
-        // すでにタワーがある場合
-        if (isOccupied)
-        {
-            Debug.Log(
-                "TowerPlacementPoint: すでにタワーが建設されています。"
-            );
-
-            return;
-        }
-
-
-        // UIが開いている場合はクリックしない
-        if (TowerBuildUI.IsUIOpen)
-        {
-            Debug.Log(
-                "TowerPlacementPoint: UIが開いているため無視しました。"
-            );
-
-            return;
-        }
-
-
-        if (TowerPlacementManager.Instance == null)
-        {
-            Debug.LogError(
-                "TowerPlacementManagerが存在しません。"
-            );
-
-            return;
-        }
-
-
-        TowerPlacementManager.Instance.OpenBuildUI(
-            this
-        );
-    }
-
-
-    /// <summary>
     /// タワーを建設したことを登録する。
     /// </summary>
     public void SetOccupied(Tower tower)
@@ -103,7 +51,8 @@ public class TowerPlacementPoint : MonoBehaviour
         if (tower == null)
         {
             Debug.LogWarning(
-                "TowerPlacementPoint: nullのTowerを登録しようとしました。"
+                "TowerPlacementPoint: " +
+                "nullのTowerを登録しようとしました。"
             );
 
             return;
@@ -111,13 +60,13 @@ public class TowerPlacementPoint : MonoBehaviour
 
 
         isOccupied = true;
+
         placedTower = tower;
 
 
         UpdateIndicator();
 
 
-        // 建設地点自身のColliderを無効化
         if (pointCollider != null)
         {
             pointCollider.enabled = false;
@@ -126,15 +75,15 @@ public class TowerPlacementPoint : MonoBehaviour
 
 
     /// <summary>
-    /// タワー売却後に建設地点を再利用可能にする。
+    /// タワー売却後に再利用可能にする。
     /// </summary>
     public void ResetPoint()
     {
         isOccupied = false;
+
         placedTower = null;
 
 
-        // 建設地点のColliderを再び有効化
         if (pointCollider != null)
         {
             pointCollider.enabled = true;
@@ -145,9 +94,6 @@ public class TowerPlacementPoint : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 建設可能表示を更新する。
-    /// </summary>
     private void UpdateIndicator()
     {
         if (availableIndicator != null)
