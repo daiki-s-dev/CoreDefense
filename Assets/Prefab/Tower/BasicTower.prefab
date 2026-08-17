@@ -171,7 +171,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   towerData: {fileID: 11400000, guid: 63a80b1119ce47841afe53c35e4dfa66, type: 2}
   level: 1
+  rangeCollider: {fileID: 6057235918044509536}
   visualRoot: {fileID: 3057084656832546432}
+  attackRangeVisualPrefab: {fileID: 1286967013332983060, guid: ff947f8e9c2c3ec488945746b087d684, type: 3}
 --- !u!58 &6057235918044509536
 CircleCollider2D:
   m_ObjectHideFlags: 0

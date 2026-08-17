@@ -263,4 +263,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   towerData: {fileID: 11400000, guid: 748cf0f4bfadbd04db44d76e22aaa9fc, type: 2}
   level: 1
+  rangeCollider: {fileID: 2691010260670193746}
   visualRoot: {fileID: 7632083054107952557}
+  attackRangeVisualPrefab: {fileID: 1286967013332983060, guid: ff947f8e9c2c3ec488945746b087d684, type: 3}

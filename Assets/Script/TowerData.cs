@@ -15,9 +15,17 @@ public class TowerData : ScriptableObject
     public Sprite icon;
 
 
+    // =====================================================
+    // 建設
+    // =====================================================
+
     [Header("建設")]
     public int buildCost = 100;
 
+
+    // =====================================================
+    // 基本ステータス
+    // =====================================================
 
     [Header("基本ステータス")]
     public int attackDamage = 30;
@@ -26,6 +34,10 @@ public class TowerData : ScriptableObject
 
     public float attackRange = 3.5f;
 
+
+    // =====================================================
+    // 強化
+    // =====================================================
 
     [Header("強化")]
     public int maxLevel = 3;
@@ -39,13 +51,17 @@ public class TowerData : ScriptableObject
     public float upgradeRange = 0.5f;
 
 
+    // =====================================================
+    // 売却
+    // =====================================================
+
     [Header("売却")]
     [Range(0f, 1f)]
     public float sellRate = 0.7f;
 
 
     // =====================================================
-    // タワーPrefab
+    // タワー本体Prefab
     // =====================================================
 
     [Header("タワーPrefab")]
@@ -53,6 +69,10 @@ public class TowerData : ScriptableObject
     [Tooltip("建設時に生成するタワー本体Prefab")]
     public GameObject towerPrefab;
 
+
+    // =====================================================
+    // レベル別見た目Prefab
+    // =====================================================
 
     [Header("レベル別見た目Prefab")]
 
@@ -72,9 +92,10 @@ public class TowerData : ScriptableObject
     public GameObject level5Prefab;
 
 
-    /// <summary>
-    /// 指定したレベルの見た目Prefabを取得する。
-    /// </summary>
+    // =====================================================
+    // レベル別Prefab取得
+    // =====================================================
+
     public GameObject GetLevelPrefab(int level)
     {
         switch (level)
