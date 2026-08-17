@@ -2,13 +2,19 @@ using UnityEngine;
 
 /// <summary>
 /// タワーディフェンスの敵。
+///
 /// WaypointPathに沿って移動し、最後のWaypointに到達すると
 /// コアへダメージを与えて消滅する。
 ///
-/// HP・ダメージ処理・WaveManagerへの登録も管理する。
+/// HP・ダメージ処理・被ダメージ演出・死亡アニメーション・
+/// WaveManagerへの登録も管理する。
 /// </summary>
 public class Enemy : MonoBehaviour
 {
+    // =====================================================
+    // HP設定
+    // =====================================================
+
     [Header("HP設定")]
     [Tooltip("敵の最大HP")]
     public int maxHP = 30;
@@ -16,23 +22,63 @@ public class Enemy : MonoBehaviour
     public int CurrentHP { get; private set; }
 
 
+    // =====================================================
+    // 移動設定
+    // =====================================================
+
     [Header("移動設定")]
     public float moveSpeed = 2f;
 
     public float waypointReachDistance = 0.05f;
 
 
+    // =====================================================
+    // コアへのダメージ
+    // =====================================================
+
     [Header("コアへのダメージ")]
     public int damageToCore = 1;
 
+
+    // =====================================================
+    // 経路
+    // =====================================================
 
     [Header("経路")]
     public WaypointPath waypointPath;
 
 
+    // =====================================================
+    // コア
+    // =====================================================
+
     [Header("コア")]
     public GameObject coreObject;
 
+
+    // =====================================================
+    // アニメーション
+    // =====================================================
+
+    [Header("アニメーション")]
+    [Tooltip("EnemyAnimationController")]
+    [SerializeField]
+    private EnemyAnimationController animationController;
+
+
+    [Tooltip("死亡アニメーション終了後に自動Destroyする")]
+    [SerializeField]
+    private bool useAutomaticDeathDestroy = false;
+
+
+    [Tooltip("Animation Eventを使わない場合の死亡待機時間")]
+    [SerializeField]
+    private float deathAnimationLength = 0.5f;
+
+
+    // =====================================================
+    // 内部状態
+    // =====================================================
 
     private int currentWaypointIndex = 0;
 
@@ -42,17 +88,55 @@ public class Enemy : MonoBehaviour
 
     private bool isMoving = true;
 
+    // 死亡処理が開始されたか
+    private bool deathStarted = false;
 
+
+    // =====================================================
+    // プロパティ
+    // =====================================================
+
+    /// <summary>
+    /// 現在のWaypoint番号。
+    /// </summary>
     public int CurrentWaypointIndex =>
         currentWaypointIndex;
 
 
+    /// <summary>
+    /// スタート地点からのルート進行度。
+    /// 数値が大きいほどコアに近い。
+    /// </summary>
     public float RouteProgress { get; private set; }
 
 
+    // =====================================================
+    // Unity Lifecycle
+    // =====================================================
+
     private void Awake()
     {
+        // HP初期化
         CurrentHP = maxHP;
+
+
+        // AnimationControllerが設定されていない場合
+        if (animationController == null)
+        {
+            animationController =
+                GetComponent<EnemyAnimationController>();
+        }
+
+
+        // 見つからない場合は警告
+        if (animationController == null)
+        {
+            Debug.LogWarning(
+                $"{gameObject.name}: " +
+                "EnemyAnimationControllerが設定されていません。",
+                this
+            );
+        }
     }
 
 
@@ -66,6 +150,7 @@ public class Enemy : MonoBehaviour
             );
 
             isMoving = false;
+
             return;
         }
 
@@ -78,10 +163,12 @@ public class Enemy : MonoBehaviour
             );
 
             isMoving = false;
+
             return;
         }
 
 
+        // 最初のWaypointから開始
         Transform firstWaypoint =
             waypointPath.GetWaypoint(0);
 
@@ -109,14 +196,17 @@ public class Enemy : MonoBehaviour
 
     private void Update()
     {
+        // 死亡中
         if (isDead)
             return;
 
 
+        // コア到達済み
         if (hasReachedCore)
             return;
 
 
+        // 移動停止中
         if (!isMoving)
             return;
 
@@ -129,20 +219,29 @@ public class Enemy : MonoBehaviour
     // HP・ダメージ
     // =====================================================
 
+    /// <summary>
+    /// 敵にダメージを与える。
+    /// </summary>
     public void TakeDamage(int damage)
     {
+        // すでに死亡処理中
         if (isDead)
             return;
 
 
+        // 0以下のダメージは無視
         if (damage <= 0)
             return;
 
 
+        // HP減少
         CurrentHP -= damage;
 
         CurrentHP =
-            Mathf.Max(CurrentHP, 0);
+            Mathf.Max(
+                CurrentHP,
+                0
+            );
 
 
         Debug.Log(
@@ -151,6 +250,20 @@ public class Enemy : MonoBehaviour
         );
 
 
+        // =================================================
+        // 被ダメージ演出
+        // =================================================
+
+        if (animationController != null)
+        {
+            animationController.PlayDamageEffect();
+        }
+
+
+        // =================================================
+        // 死亡判定
+        // =================================================
+
         if (CurrentHP <= 0)
         {
             Die();
@@ -158,8 +271,12 @@ public class Enemy : MonoBehaviour
     }
 
 
+    // =====================================================
+    // 死亡
+    // =====================================================
+
     /// <summary>
-    /// 敵を撃破した。
+    /// 敵の死亡処理を開始する。
     /// </summary>
     private void Die()
     {
@@ -171,29 +288,126 @@ public class Enemy : MonoBehaviour
 
         isMoving = false;
 
+        deathStarted = true;
+
 
         Debug.Log(
             $"{gameObject.name} を撃破しました。"
         );
 
 
-        // WaveManagerへ撃破を通知
-        if (WaveManager.Instance != null)
+        // =================================================
+        // 死亡アニメーション
+        // =================================================
+
+        if (animationController != null)
         {
-            WaveManager.Instance.NotifyEnemyRemoved(this);
+            animationController.PlayDeathAnimation();
+        }
+        else
+        {
+            // AnimationControllerがない場合
+            // 即座に死亡処理
+            FinishDeath();
+
+            return;
         }
 
+
+        // =================================================
+        // 死亡アニメーション終了処理
+        // =================================================
+
+        if (useAutomaticDeathDestroy)
+        {
+            float animationLength =
+                animationController.GetDeathAnimationLength();
+
+
+            if (animationLength <= 0f)
+            {
+                animationLength =
+                    deathAnimationLength;
+            }
+
+
+            Invoke(
+                nameof(FinishDeath),
+                animationLength
+            );
+        }
+
+        // useAutomaticDeathDestroy=falseの場合は
+        // Animation EventからFinishDeathAnimation()
+        // を呼び出す。
+    }
+
+
+    /// <summary>
+    /// 死亡アニメーション終了時に呼び出す。
+    ///
+    /// Animation Eventから呼び出すことができる。
+    /// </summary>
+    public void FinishDeathAnimation()
+    {
+        if (!deathStarted)
+            return;
+
+
+        FinishDeath();
+    }
+
+
+    /// <summary>
+    /// 死亡処理を完全に終了する。
+    /// </summary>
+    private void FinishDeath()
+    {
+        // すでにDestroy処理済みなら終了
+        if (!deathStarted)
+            return;
+
+
+        deathStarted = false;
+
+
+        // =================================================
+        // WaveManagerへ通知
+        // =================================================
+
+        if (WaveManager.Instance != null)
+        {
+            WaveManager.Instance.NotifyEnemyRemoved(
+                this
+            );
+        }
+
+
+        Debug.Log(
+            $"{gameObject.name} の死亡処理が完了しました。"
+        );
+
+
+        // =================================================
+        // 敵を削除
+        // =================================================
 
         Destroy(gameObject);
     }
 
 
+    /// <summary>
+    /// 敵が死亡しているか。
+    /// </summary>
     public bool IsDead()
     {
         return isDead;
     }
 
 
+    /// <summary>
+    /// HP割合を取得する。
+    /// </summary>
     public float GetHPRatio()
     {
         if (maxHP <= 0)
@@ -257,6 +471,10 @@ public class Enemy : MonoBehaviour
     }
 
 
+    // =====================================================
+    // RouteProgress
+    // =====================================================
+
     private void UpdateRouteProgress()
     {
         Transform currentWaypoint =
@@ -272,6 +490,7 @@ public class Enemy : MonoBehaviour
         if (currentWaypointIndex == 0)
         {
             RouteProgress = 0f;
+
             return;
         }
 
@@ -317,12 +536,17 @@ public class Enemy : MonoBehaviour
     }
 
 
+    // =====================================================
+    // Waypoint到達
+    // =====================================================
+
     private void ReachWaypoint()
     {
         RouteProgress =
             currentWaypointIndex;
 
 
+        // 最後のWaypointか
         if (
             currentWaypointIndex >=
             waypointPath.WaypointCount - 1
@@ -334,16 +558,19 @@ public class Enemy : MonoBehaviour
         }
 
 
+        // 次のWaypointへ
         currentWaypointIndex++;
+
 
         RouteProgress =
             currentWaypointIndex;
     }
 
 
-    /// <summary>
-    /// コアに到達した。
-    /// </summary>
+    // =====================================================
+    // コア到達
+    // =====================================================
+
     private void ReachCore()
     {
         if (hasReachedCore)
@@ -355,7 +582,10 @@ public class Enemy : MonoBehaviour
         isMoving = false;
 
 
+        // =================================================
         // コアにダメージ
+        // =================================================
+
         if (coreObject != null)
         {
             coreObject.SendMessage(
@@ -374,14 +604,22 @@ public class Enemy : MonoBehaviour
         }
 
 
-        // WaveManagerへ消滅を通知
+        // =================================================
+        // WaveManagerへ通知
+        // =================================================
+
         if (WaveManager.Instance != null)
         {
-            WaveManager.Instance.NotifyEnemyRemoved(this);
+            WaveManager.Instance.NotifyEnemyRemoved(
+                this
+            );
         }
 
 
-        // コア到達した敵を消滅
+        // =================================================
+        // コア到達した敵は即消滅
+        // =================================================
+
         Destroy(gameObject);
     }
 
@@ -390,6 +628,9 @@ public class Enemy : MonoBehaviour
     // 外部設定
     // =====================================================
 
+    /// <summary>
+    /// EnemySpawnerなどから移動ルートを設定する。
+    /// </summary>
     public void SetPath(
         WaypointPath path,
         GameObject core)
@@ -406,18 +647,26 @@ public class Enemy : MonoBehaviour
 
         isMoving = true;
 
+        deathStarted = false;
+
         CurrentHP = maxHP;
 
         RouteProgress = 0f;
     }
 
 
+    /// <summary>
+    /// 敵の移動を停止する。
+    /// </summary>
     public void StopMovement()
     {
         isMoving = false;
     }
 
 
+    /// <summary>
+    /// 敵の移動を再開する。
+    /// </summary>
     public void ResumeMovement()
     {
         if (isDead)

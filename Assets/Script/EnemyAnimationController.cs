@@ -17,7 +17,7 @@ public class EnemyAnimationController : MonoBehaviour
 
 
     // =====================================================
-    // 被ダメージ演出
+    // SpriteRenderer
     // =====================================================
 
     [Header("被ダメージ演出")]
@@ -25,7 +25,8 @@ public class EnemyAnimationController : MonoBehaviour
     [SerializeField]
     private SpriteRenderer spriteRenderer;
 
-    [Tooltip("赤く点滅する時間")]
+
+    [Tooltip("赤くする時間")]
     [SerializeField]
     private float damageFlashDuration = 0.1f;
 
@@ -45,7 +46,10 @@ public class EnemyAnimationController : MonoBehaviour
 
     private void Awake()
     {
-        // SpriteRendererが設定されていない場合
+        // -------------------------------------------------
+        // SpriteRenderer
+        // -------------------------------------------------
+
         if (spriteRenderer == null)
         {
             spriteRenderer =
@@ -58,13 +62,34 @@ public class EnemyAnimationController : MonoBehaviour
             originalColor =
                 spriteRenderer.color;
         }
+        else
+        {
+            Debug.LogWarning(
+                $"{gameObject.name}: " +
+                "SpriteRendererが見つかりません。",
+                this
+            );
+        }
 
 
-        // Animatorが設定されていない場合
+        // -------------------------------------------------
+        // Animator
+        // -------------------------------------------------
+
         if (animator == null)
         {
             animator =
-                GetComponent<Animator>();
+                GetComponentInChildren<Animator>();
+        }
+
+
+        if (animator == null)
+        {
+            Debug.LogWarning(
+                $"{gameObject.name}: " +
+                "Animatorが見つかりません。",
+                this
+            );
         }
     }
 
@@ -74,7 +99,7 @@ public class EnemyAnimationController : MonoBehaviour
     // =====================================================
 
     /// <summary>
-    /// 被ダメージ時の演出。
+    /// 被ダメージ時の赤点滅。
     /// </summary>
     public void PlayDamageEffect()
     {
@@ -91,7 +116,6 @@ public class EnemyAnimationController : MonoBehaviour
         }
 
 
-        // 赤点滅開始
         damageFlashCoroutine =
             StartCoroutine(
                 DamageFlashCoroutine()
@@ -100,7 +124,7 @@ public class EnemyAnimationController : MonoBehaviour
 
 
     /// <summary>
-    /// 赤く点滅させる。
+    /// Spriteを赤くする。
     /// </summary>
     private IEnumerator DamageFlashCoroutine()
     {
@@ -109,13 +133,13 @@ public class EnemyAnimationController : MonoBehaviour
             Color.red;
 
 
-        // 少し待つ
+        // 待機
         yield return new WaitForSeconds(
             damageFlashDuration
         );
 
 
-        // 元の色に戻す
+        // 元に戻す
         spriteRenderer.color =
             originalColor;
 
@@ -136,7 +160,8 @@ public class EnemyAnimationController : MonoBehaviour
         if (animator == null)
         {
             Debug.LogWarning(
-                $"{gameObject.name}: Animatorが設定されていません。",
+                $"{gameObject.name}: " +
+                "Animatorが設定されていません。",
                 this
             );
 
@@ -144,12 +169,69 @@ public class EnemyAnimationController : MonoBehaviour
         }
 
 
+        Debug.Log(
+            $"{gameObject.name}: 死亡アニメーション開始"
+        );
+
+
         animator.SetTrigger("Die");
     }
 
 
+    // =====================================================
+    // Animation Event用
+    // =====================================================
+
+    /// <summary>
+    /// 死亡アニメーションの最後に
+    /// Animation Eventから呼び出す。
+    ///
+    /// Enemy.csのFinishDeathAnimation()を呼び出す。
+    /// </summary>
+    public void OnDeathAnimationFinished()
+    {
+        Enemy enemy =
+            GetComponent<Enemy>();
+
+
+        if (enemy == null)
+        {
+            enemy =
+                GetComponentInParent<Enemy>();
+        }
+
+
+        if (enemy == null)
+        {
+            Debug.LogError(
+                $"{gameObject.name}: " +
+                "Enemy.csが見つかりません。",
+                this
+            );
+
+            return;
+        }
+
+
+        Debug.Log(
+            $"{gameObject.name}: " +
+            "Animation Event → 死亡アニメーション終了"
+        );
+
+
+        enemy.FinishDeathAnimation();
+    }
+
+
+    // =====================================================
+    // 死亡アニメーション長さ
+    // =====================================================
+
     /// <summary>
     /// 死亡アニメーションの長さを取得する。
+    ///
+    /// Animation Event方式を使う場合は
+    /// 基本的に使用しない。
     /// </summary>
     public float GetDeathAnimationLength()
     {
@@ -184,9 +266,6 @@ public class EnemyAnimationController : MonoBehaviour
     // 色リセット
     // =====================================================
 
-    /// <summary>
-    /// 色を元に戻す。
-    /// </summary>
     public void ResetColor()
     {
         if (spriteRenderer == null)
