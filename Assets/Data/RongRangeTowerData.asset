@@ -13,19 +13,21 @@ MonoBehaviour:
   m_Name: RongRangeTowerData
   m_EditorClassIdentifier: 
   towerName: "\u9577\u8DDD\u96E2\u30BF\u30EF\u30FC"
-  description: "\u30D0\u30E9\u30F3\u30B9\u306E\u826F\u3044\u57FA\u672C\u30BF\u30EF\u30FC\u3067\u3059\u3002"
+  description: "\u653B\u6483\u901F\u5EA6\u304C\u9045\u3044\u304C\u653B\u6483\u7BC4\u56F2\u304C\u5E83\u3044\u30BF\u30EF\u30FC"
   icon: {fileID: -4377652790556299461, guid: 237979eecd466b249a2d19eb98a499e1, type: 3}
-  towerPrefab: {fileID: 7879087255207431067, guid: 68b35927a89ac78408f0179401c081d8, type: 3}
   buildCost: 50
   attackDamage: 10
-  attackInterval: 1
-  attackRange: 3
+  attackInterval: 2.5
+  attackRange: 4
   maxLevel: 3
   upgradeCost: 100
   upgradeDamage: 10
   upgradeIntervalReduction: 0.1
-  upgradeRange: 0.5
+  upgradeRange: 1
+  sellRate: 0.5
+  towerPrefab: {fileID: 7879087255207431067, guid: 68b35927a89ac78408f0179401c081d8, type: 3}
   level1Prefab: {fileID: 7879087255207431067, guid: b9f559658c117b745ab060507fbdcbed, type: 3}
   level2Prefab: {fileID: 7879087255207431067, guid: 8c046fdcae086c440be74926ef38216a, type: 3}
   level3Prefab: {fileID: 7879087255207431067, guid: 2091aa4494944b2408ceb855cfacec4b, type: 3}
-  sellRate: 0.5
+  level4Prefab: {fileID: 0}
+  level5Prefab: {fileID: 0}

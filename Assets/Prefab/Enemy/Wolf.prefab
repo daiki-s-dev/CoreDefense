@@ -105,15 +105,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxHP: 30
+  killReward: 75
   moveSpeed: 1.2
   waypointReachDistance: 0.05
   damageToCore: 1
   waypointPath: {fileID: 0}
   coreObject: {fileID: 3209344048830403304, guid: 2962f83bf0444f44ba750970f374021d, type: 3}
-  animator: {fileID: 8971497582905769034}
-  deathTriggerName: Die
-  damageFlashDuration: 0.1
-  damageFlashColor: {r: 1, g: 0, b: 0, a: 1}
+  animationController: {fileID: 0}
+  useAutomaticDeathDestroy: 0
+  deathAnimationLength: 0.5
 --- !u!58 &1233675252190936114
 CircleCollider2D:
   m_ObjectHideFlags: 0

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,20 +9,32 @@ using UnityEngine.UI;
 ///
 /// ・Wave開始ボタン
 /// ・Wave進行
+/// ・4方向Spawner
+/// ・敵の総数管理
 /// ・敵の残数管理
 /// ・Waveクリア判定
-/// ・次Wave開始ボタン表示
+/// ・Wave UI
+/// ・次Wave開始表示
 /// </summary>
 public class WaveManager : MonoBehaviour
 {
     public static WaveManager Instance { get; private set; }
 
 
+    // =====================================================
+    // Wave
+    // =====================================================
+
     [Header("Wave")]
     public WaveData[] waves;
 
 
+    // =====================================================
+    // 4方向Spawner
+    // =====================================================
+
     [Header("4方向Spawner")]
+
     public EnemySpawner northSpawner;
 
     public EnemySpawner southSpawner;
@@ -31,42 +44,129 @@ public class WaveManager : MonoBehaviour
     public EnemySpawner westSpawner;
 
 
-    [Header("Wave UI")]
+    // =====================================================
+    // Wave開始ボタン
+    // =====================================================
+
+    [Header("Wave開始ボタン")]
+
     [Tooltip("Wave開始ボタン")]
     public Button waveStartButton;
 
 
-    [Tooltip("Wave開始ボタンの表示オブジェクト")]
+    [Tooltip("Wave開始ボタン全体")]
     public GameObject waveStartButtonObject;
 
 
+    // =====================================================
+    // Wave UI
+    // =====================================================
+
+    [Header("Wave UI")]
+
+    [Tooltip("現在のWave")]
+    public TMP_Text waveText;
+
+
+    [Tooltip("残り敵数")]
+    public TMP_Text enemyCountText;
+
+
+    [Tooltip("Waveクリア表示")]
+    public TMP_Text waveClearText;
+
+
+    [Tooltip("次のWave表示")]
+    public TMP_Text nextWaveText;
+
+
+    [Tooltip("Waveクリア表示時間")]
+    public float waveClearDisplayTime = 2f;
+
+
+    // =====================================================
+    // 状態
+    // =====================================================
+
     [Header("状態")]
+
     [SerializeField]
     private int currentWaveIndex = -1;
 
 
     /// <summary>
-    /// 現在Wave番号。
+    /// 現在のWave番号。
     /// </summary>
-    public int CurrentWave =>
-        currentWaveIndex + 1;
+    public int CurrentWave
+    {
+        get
+        {
+            return currentWaveIndex + 1;
+        }
+    }
 
 
     /// <summary>
     /// Waveが進行中か。
     /// </summary>
-    public bool IsWaveRunning { get; private set; }
+    public bool IsWaveRunning
+    {
+        get;
+        private set;
+    }
+
+
+    // =====================================================
+    // 敵数
+    // =====================================================
+
+    /// <summary>
+    /// Wave全体の敵総数。
+    ///
+    /// 例：
+    /// North 5
+    /// South 5
+    /// East 10
+    /// West 0
+    ///
+    /// → 20
+    /// </summary>
+    public int TotalEnemyCount
+    {
+        get;
+        private set;
+    }
 
 
     /// <summary>
-    /// 現在フィールドに存在する敵。
+    /// 現在残っている敵数。
+    /// </summary>
+    public int RemainingEnemyCount
+    {
+        get;
+        private set;
+    }
+
+
+    /// <summary>
+    /// 現在フィールド上に存在する敵。
     /// </summary>
     private readonly HashSet<Enemy> activeEnemies =
         new HashSet<Enemy>();
 
 
+    // =====================================================
+    // Coroutine
+    // =====================================================
+
     private Coroutine waveCoroutine;
 
+    private Coroutine clearUICoroutine;
+
+
+    // =====================================================
+    // Unity
+    // =====================================================
 
     private void Awake()
     {
@@ -86,7 +186,10 @@ public class WaveManager : MonoBehaviour
 
     private void Start()
     {
-        // 開始ボタンにイベント登録
+        // -------------------------------------------------
+        // Wave開始ボタン
+        // -------------------------------------------------
+
         if (waveStartButton != null)
         {
             waveStartButton.onClick.AddListener(
@@ -95,7 +198,29 @@ public class WaveManager : MonoBehaviour
         }
 
 
-        // 最初はWave 1開始ボタンを表示
+        // -------------------------------------------------
+        // 最初の状態
+        // -------------------------------------------------
+
+        IsWaveRunning = false;
+
+        TotalEnemyCount = 0;
+
+        RemainingEnemyCount = 0;
+
+
+        HideWaveText();
+
+        HideEnemyCountText();
+
+        HideWaveClearText();
+
+
+        // 最初はWave 1
+        ShowNextWaveText(1);
+
+
+        // Wave開始ボタンを表示
         ShowWaveStartButton();
     }
 
@@ -131,7 +256,7 @@ public class WaveManager : MonoBehaviour
             return;
 
 
-        // Waveが存在しない
+        // WaveDataがない
         if (
             waves == null ||
             waves.Length == 0
@@ -173,15 +298,52 @@ public class WaveManager : MonoBehaviour
         if (wave == null)
         {
             Debug.LogError(
-                $"Wave {currentWaveIndex + 1} がnullです。"
+                $"Wave {currentWaveIndex + 1} がnullです。",
+                this
             );
 
             return;
         }
 
 
+        // -------------------------------------------------
+        // 敵数を初期化
+        // -------------------------------------------------
+
+        TotalEnemyCount =
+            wave.GetTotalEnemyCount();
+
+
+        RemainingEnemyCount =
+            TotalEnemyCount;
+
+
+        // 念のため前Waveの敵情報をクリア
+        activeEnemies.Clear();
+
+
+        // -------------------------------------------------
+        // UI
+        // -------------------------------------------------
+
         HideWaveStartButton();
 
+        HideNextWaveText();
+
+        HideWaveClearText();
+
+
+        ShowWaveText(
+            CurrentWave
+        );
+
+
+        ShowEnemyCountText();
+
+
+        // -------------------------------------------------
+        // Coroutine
+        // -------------------------------------------------
 
         waveCoroutine =
             StartCoroutine(
@@ -189,6 +351,10 @@ public class WaveManager : MonoBehaviour
             );
     }
 
+
+    // =====================================================
+    // Wave進行
+    // =====================================================
 
     private IEnumerator StartWaveCoroutine(
         WaveData wave)
@@ -201,7 +367,10 @@ public class WaveManager : MonoBehaviour
         );
 
 
+        // -------------------------------------------------
         // 開始前待機
+        // -------------------------------------------------
+
         if (wave.startDelay > 0f)
         {
             yield return new WaitForSeconds(
@@ -210,32 +379,41 @@ public class WaveManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
         // Spawner開始
+        // -------------------------------------------------
+
         StartSpawners(wave);
 
 
-        // 敵がスポーンし終わるまで待つ
+        // -------------------------------------------------
+        // 敵スポーン終了待ち
+        // -------------------------------------------------
+
         yield return StartCoroutine(
             WaitForSpawningFinished()
         );
 
 
-        // ここではまだWaveクリアではない
-        //
-        // フィールドに敵が残っているため、
-        // すべて消滅するまで待つ。
+        // -------------------------------------------------
+        // 全敵消滅待ち
+        // -------------------------------------------------
+
         yield return StartCoroutine(
             WaitForAllEnemiesDefeated()
         );
 
 
+        // -------------------------------------------------
         // Waveクリア
+        // -------------------------------------------------
+
         WaveCleared();
     }
 
 
     // =====================================================
-    // Spawner
+    // Spawner開始
     // =====================================================
 
     private void StartSpawners(
@@ -246,7 +424,9 @@ public class WaveManager : MonoBehaviour
             northSpawner != null
         )
         {
-            northSpawner.StartWave(wave);
+            northSpawner.StartWave(
+                wave
+            );
         }
 
 
@@ -255,7 +435,9 @@ public class WaveManager : MonoBehaviour
             southSpawner != null
         )
         {
-            southSpawner.StartWave(wave);
+            southSpawner.StartWave(
+                wave
+            );
         }
 
 
@@ -264,7 +446,9 @@ public class WaveManager : MonoBehaviour
             eastSpawner != null
         )
         {
-            eastSpawner.StartWave(wave);
+            eastSpawner.StartWave(
+                wave
+            );
         }
 
 
@@ -273,14 +457,17 @@ public class WaveManager : MonoBehaviour
             westSpawner != null
         )
         {
-            westSpawner.StartWave(wave);
+            westSpawner.StartWave(
+                wave
+            );
         }
     }
 
 
-    /// <summary>
-    /// Spawnerのスポーンがすべて終了するまで待つ。
-    /// </summary>
+    // =====================================================
+    // スポーン終了待ち
+    // =====================================================
+
     private IEnumerator WaitForSpawningFinished()
     {
         while (true)
@@ -334,7 +521,7 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // 敵管理
+    // 敵登録
     // =====================================================
 
     /// <summary>
@@ -347,14 +534,23 @@ public class WaveManager : MonoBehaviour
             return;
 
 
-        activeEnemies.Add(enemy);
+        activeEnemies.Add(
+            enemy
+        );
 
 
         Debug.Log(
-            $"敵出現。現在の敵数：{activeEnemies.Count}"
+            $"敵出現。現在のフィールド敵数：{activeEnemies.Count}"
         );
+
+
+        UpdateEnemyCountUI();
     }
 
+
+    // =====================================================
+    // 敵消滅
+    // =====================================================
 
     /// <summary>
     /// 敵が撃破またはコア到達で消滅したときに呼ばれる。
@@ -366,30 +562,57 @@ public class WaveManager : MonoBehaviour
             return;
 
 
-        activeEnemies.Remove(enemy);
+        // すでに削除済みなら何もしない
+        bool removed =
+            activeEnemies.Remove(
+                enemy
+            );
+
+
+        if (!removed)
+            return;
+
+
+        // 残数を1減らす
+        RemainingEnemyCount =
+            Mathf.Max(
+                0,
+                RemainingEnemyCount - 1
+            );
 
 
         Debug.Log(
-            $"敵消滅。残り敵数：{activeEnemies.Count}"
+            $"敵消滅。残り敵数：{RemainingEnemyCount}/{TotalEnemyCount}"
         );
+
+
+        // UI更新
+        UpdateEnemyCountUI();
     }
 
 
-    /// <summary>
-    /// フィールド上の敵がすべて消えるまで待つ。
-    /// </summary>
+    // =====================================================
+    // 全敵消滅待ち
+    // =====================================================
+
     private IEnumerator WaitForAllEnemiesDefeated()
     {
         while (true)
         {
-            // 念のためnullを削除
+            // nullになったEnemyを削除
             activeEnemies.RemoveWhere(
                 enemy => enemy == null
             );
 
 
-            if (activeEnemies.Count == 0)
+            // 全敵が消滅
+            if (
+                activeEnemies.Count == 0 &&
+                RemainingEnemyCount <= 0
+            )
+            {
                 break;
+            }
 
 
             yield return null;
@@ -411,13 +634,45 @@ public class WaveManager : MonoBehaviour
         );
 
 
-        // まだWaveが残っている
+        // -------------------------------------------------
+        // Waveクリア表示
+        // -------------------------------------------------
+
+        ShowWaveClearText(
+            CurrentWave
+        );
+
+
+        // -------------------------------------------------
+        // WaveTextを消す
+        // -------------------------------------------------
+
+        HideWaveText();
+
+        HideEnemyCountText();
+
+
+        // -------------------------------------------------
+        // 次Waveがあるか
+        // -------------------------------------------------
+
         if (
             currentWaveIndex <
             waves.Length - 1
         )
         {
-            ShowWaveStartButton();
+            // 次Wave番号
+            int nextWave =
+                CurrentWave + 1;
+
+
+            // endDelay後に次Waveボタンと
+            // 「次はWave X」を表示
+            StartCoroutine(
+                ShowNextWaveAfterDelay(
+                    nextWave
+                )
+            );
         }
         else
         {
@@ -428,6 +683,8 @@ public class WaveManager : MonoBehaviour
 
 
             HideWaveStartButton();
+
+            HideNextWaveText();
         }
 
 
@@ -436,18 +693,261 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
+    // 次Wave表示
+    // =====================================================
+
+    private IEnumerator ShowNextWaveAfterDelay(
+        int nextWave)
+    {
+        float delay = 0f;
+
+
+        if (
+            currentWaveIndex >= 0 &&
+            currentWaveIndex < waves.Length
+        )
+        {
+            WaveData currentWave =
+                waves[currentWaveIndex];
+
+
+            if (currentWave != null)
+            {
+                delay =
+                    Mathf.Max(
+                        0f,
+                        currentWave.endDelay
+                    );
+            }
+        }
+
+
+        if (delay > 0f)
+        {
+            yield return new WaitForSeconds(
+                delay
+            );
+        }
+
+
+        // 次Wave表示
+        ShowNextWaveText(
+            nextWave
+        );
+
+
+        // 開始ボタン表示
+        ShowWaveStartButton();
+    }
+
+
+    // =====================================================
     // UI
+    // =====================================================
+
+    /// <summary>
+    /// Wave番号を表示。
+    /// </summary>
+    private void ShowWaveText(
+        int waveNumber)
+    {
+        if (waveText == null)
+            return;
+
+
+        waveText.text =
+            $"Wave {waveNumber}";
+
+
+        waveText.gameObject.SetActive(
+            true
+        );
+    }
+
+
+    /// <summary>
+    /// Wave番号を非表示。
+    /// </summary>
+    private void HideWaveText()
+    {
+        if (waveText == null)
+            return;
+
+
+        waveText.gameObject.SetActive(
+            false
+        );
+    }
+
+
+    // =====================================================
+    // 敵数UI
+    // =====================================================
+
+    /// <summary>
+    /// 敵数UIを表示。
+    /// </summary>
+    private void ShowEnemyCountText()
+    {
+        if (enemyCountText == null)
+            return;
+
+
+        enemyCountText.gameObject.SetActive(
+            true
+        );
+
+
+        UpdateEnemyCountUI();
+    }
+
+
+    /// <summary>
+    /// 敵数UIを更新。
+    ///
+    /// 例：
+    /// 敵 5 / 20
+    /// </summary>
+    private void UpdateEnemyCountUI()
+    {
+        if (enemyCountText == null)
+            return;
+
+
+        enemyCountText.text =
+            $"敵 {RemainingEnemyCount} / {TotalEnemyCount}";
+    }
+
+
+    /// <summary>
+    /// 敵数UIを非表示。
+    /// </summary>
+    private void HideEnemyCountText()
+    {
+        if (enemyCountText == null)
+            return;
+
+
+        enemyCountText.gameObject.SetActive(
+            false
+        );
+    }
+
+
+    // =====================================================
+    // WaveクリアUI
+    // =====================================================
+
+    private void ShowWaveClearText(
+        int waveNumber)
+    {
+        if (waveClearText == null)
+            return;
+
+
+        if (clearUICoroutine != null)
+        {
+            StopCoroutine(
+                clearUICoroutine
+            );
+        }
+
+
+        clearUICoroutine =
+            StartCoroutine(
+                WaveClearTextCoroutine(
+                    waveNumber
+                )
+            );
+    }
+
+
+    private IEnumerator WaveClearTextCoroutine(
+        int waveNumber)
+    {
+        waveClearText.text =
+            $"Wave {waveNumber} CLEAR!";
+
+
+        waveClearText.gameObject.SetActive(
+            true
+        );
+
+
+        yield return new WaitForSeconds(
+            waveClearDisplayTime
+        );
+
+
+        HideWaveClearText();
+
+
+        clearUICoroutine = null;
+    }
+
+
+    private void HideWaveClearText()
+    {
+        if (waveClearText == null)
+            return;
+
+
+        waveClearText.gameObject.SetActive(
+            false
+        );
+    }
+
+
+    // =====================================================
+    // 次Wave UI
+    // =====================================================
+
+    private void ShowNextWaveText(
+        int waveNumber)
+    {
+        if (nextWaveText == null)
+            return;
+
+
+        nextWaveText.text =
+            $"次は Wave {waveNumber}";
+
+
+        nextWaveText.gameObject.SetActive(
+            true
+        );
+    }
+
+
+    private void HideNextWaveText()
+    {
+        if (nextWaveText == null)
+            return;
+
+
+        nextWaveText.gameObject.SetActive(
+            false
+        );
+    }
+
+
+    // =====================================================
+    // Wave開始ボタン
     // =====================================================
 
     private void ShowWaveStartButton()
     {
         if (waveStartButtonObject != null)
         {
-            waveStartButtonObject.SetActive(true);
+            waveStartButtonObject.SetActive(
+                true
+            );
         }
         else if (waveStartButton != null)
         {
-            waveStartButton.gameObject.SetActive(true);
+            waveStartButton.gameObject.SetActive(
+                true
+            );
         }
     }
 
@@ -456,11 +956,15 @@ public class WaveManager : MonoBehaviour
     {
         if (waveStartButtonObject != null)
         {
-            waveStartButtonObject.SetActive(false);
+            waveStartButtonObject.SetActive(
+                false
+            );
         }
         else if (waveStartButton != null)
         {
-            waveStartButton.gameObject.SetActive(false);
+            waveStartButton.gameObject.SetActive(
+                false
+            );
         }
     }
 
@@ -478,6 +982,16 @@ public class WaveManager : MonoBehaviour
             );
 
             waveCoroutine = null;
+        }
+
+
+        if (clearUICoroutine != null)
+        {
+            StopCoroutine(
+                clearUICoroutine
+            );
+
+            clearUICoroutine = null;
         }
 
 
@@ -506,5 +1020,24 @@ public class WaveManager : MonoBehaviour
 
 
         IsWaveRunning = false;
+
+
+        activeEnemies.Clear();
+
+
+        TotalEnemyCount = 0;
+
+        RemainingEnemyCount = 0;
+
+
+        HideWaveText();
+
+        HideEnemyCountText();
+
+        HideWaveClearText();
+
+        HideNextWaveText();
+
+        HideWaveStartButton();
     }
 }
