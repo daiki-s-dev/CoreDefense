@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// タワーを建設できる場所を管理する。
@@ -8,12 +9,15 @@ public class TowerPlacementPoint : MonoBehaviour
     [Header("表示")]
     public GameObject availableIndicator;
 
+
     [Header("状態")]
     [SerializeField]
     private bool isOccupied = false;
 
+
     // この場所に建設されているタワー
     private Tower placedTower;
+
 
     // 建設地点のCollider
     private Collider2D pointCollider;
@@ -33,7 +37,8 @@ public class TowerPlacementPoint : MonoBehaviour
 
     private void Awake()
     {
-        pointCollider = GetComponent<Collider2D>();
+        pointCollider =
+            GetComponent<Collider2D>();
     }
 
 
@@ -48,9 +53,18 @@ public class TowerPlacementPoint : MonoBehaviour
     /// </summary>
     private void OnMouseDown()
     {
+        // UIの上をクリックしている場合は無視
+        if (EventSystem.current != null &&
+            EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+
+
         // すでにタワーがある場合は何もしない
         if (isOccupied)
             return;
+
 
         if (TowerPlacementManager.Instance == null)
         {
@@ -60,6 +74,12 @@ public class TowerPlacementPoint : MonoBehaviour
 
             return;
         }
+
+
+        // UIが開いている間は無視
+        if (TowerPlacementManager.Instance.IsUIOpen)
+            return;
+
 
         TowerPlacementManager.Instance.OpenBuildUI(this);
     }
@@ -79,10 +99,13 @@ public class TowerPlacementPoint : MonoBehaviour
             return;
         }
 
+
         isOccupied = true;
         placedTower = tower;
 
+
         UpdateIndicator();
+
 
         // 建設地点自身のColliderを無効化
         // タワーのColliderでクリックできるようにする
@@ -101,11 +124,13 @@ public class TowerPlacementPoint : MonoBehaviour
         isOccupied = false;
         placedTower = null;
 
+
         // 建設地点のColliderを再び有効化
         if (pointCollider != null)
         {
             pointCollider.enabled = true;
         }
+
 
         UpdateIndicator();
     }

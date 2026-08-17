@@ -7,6 +7,13 @@ using UnityEngine.UI;
 /// </summary>
 public class TowerBuildUI : MonoBehaviour
 {
+    public static bool IsUIOpen { get; private set; }
+
+
+    // =====================================================
+    // パネル
+    // =====================================================
+
     [Header("パネル")]
     public GameObject panel;
 
@@ -32,6 +39,14 @@ public class TowerBuildUI : MonoBehaviour
 
 
     // =====================================================
+    // 建設モード閉じるボタン
+    // =====================================================
+
+    [Header("建設モード閉じる")]
+    public Button buildCloseButton;
+
+
+    // =====================================================
     // タワー情報
     // =====================================================
 
@@ -42,12 +57,36 @@ public class TowerBuildUI : MonoBehaviour
 
     public TMP_Text descriptionText;
 
+
+    // =====================================================
+    // 現在のステータス
+    // =====================================================
+
+    [Header("現在のステータス")]
     public TMP_Text attackDamageText;
 
     public TMP_Text attackIntervalText;
 
     public TMP_Text attackRangeText;
 
+
+    // =====================================================
+    // アップグレード後のステータス
+    // =====================================================
+
+    [Header("アップグレード後のステータス")]
+    public TMP_Text nextAttackDamageText;
+
+    public TMP_Text nextAttackIntervalText;
+
+    public TMP_Text nextAttackRangeText;
+
+
+    // =====================================================
+    // 建設費
+    // =====================================================
+
+    [Header("建設費")]
     public TMP_Text buildCostText;
 
 
@@ -88,12 +127,16 @@ public class TowerBuildUI : MonoBehaviour
 
 
     // =====================================================
-    // 共通
+    // タワー管理モード閉じるボタン
     // =====================================================
 
-    [Header("閉じる")]
-    public Button closeButton;
+    [Header("タワー管理モード閉じる")]
+    public Button towerCloseButton;
 
+
+    // =====================================================
+    // メッセージ
+    // =====================================================
 
     [Header("メッセージ")]
     public TMP_Text messageText;
@@ -103,9 +146,16 @@ public class TowerBuildUI : MonoBehaviour
     private TowerData selectedTowerData;
 
 
+    // =====================================================
+    // 初期化
+    // =====================================================
+
     private void Awake()
     {
+        // -------------------------------------------------
         // タワー選択
+        // -------------------------------------------------
+
         if (towerButton1 != null)
         {
             towerButton1.onClick.AddListener(
@@ -130,7 +180,10 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
         // 建設
+        // -------------------------------------------------
+
         if (buildButton != null)
         {
             buildButton.onClick.AddListener(
@@ -139,7 +192,10 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
         // 強化
+        // -------------------------------------------------
+
         if (upgradeButton != null)
         {
             upgradeButton.onClick.AddListener(
@@ -148,7 +204,10 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
-        // 破壊
+        // -------------------------------------------------
+        // 売却
+        // -------------------------------------------------
+
         if (sellButton != null)
         {
             sellButton.onClick.AddListener(
@@ -157,11 +216,26 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
-        // 閉じる
-        if (closeButton != null)
+        // -------------------------------------------------
+        // 建設モード閉じる
+        // -------------------------------------------------
+
+        if (buildCloseButton != null)
         {
-            closeButton.onClick.AddListener(
-                OnCloseButtonClicked
+            buildCloseButton.onClick.AddListener(
+                OnBuildCloseButtonClicked
+            );
+        }
+
+
+        // -------------------------------------------------
+        // タワー管理モード閉じる
+        // -------------------------------------------------
+
+        if (towerCloseButton != null)
+        {
+            towerCloseButton.onClick.AddListener(
+                OnTowerCloseButtonClicked
             );
         }
     }
@@ -169,20 +243,26 @@ public class TowerBuildUI : MonoBehaviour
 
     private void OnDestroy()
     {
+        IsUIOpen = false;
+
+
         if (towerButton1 != null)
         {
             towerButton1.onClick.RemoveAllListeners();
         }
+
 
         if (towerButton2 != null)
         {
             towerButton2.onClick.RemoveAllListeners();
         }
 
+
         if (towerButton3 != null)
         {
             towerButton3.onClick.RemoveAllListeners();
         }
+
 
         if (buildButton != null)
         {
@@ -191,12 +271,14 @@ public class TowerBuildUI : MonoBehaviour
             );
         }
 
+
         if (upgradeButton != null)
         {
             upgradeButton.onClick.RemoveListener(
                 OnUpgradeButtonClicked
             );
         }
+
 
         if (sellButton != null)
         {
@@ -205,10 +287,19 @@ public class TowerBuildUI : MonoBehaviour
             );
         }
 
-        if (closeButton != null)
+
+        if (buildCloseButton != null)
         {
-            closeButton.onClick.RemoveListener(
-                OnCloseButtonClicked
+            buildCloseButton.onClick.RemoveListener(
+                OnBuildCloseButtonClicked
+            );
+        }
+
+
+        if (towerCloseButton != null)
+        {
+            towerCloseButton.onClick.RemoveListener(
+                OnTowerCloseButtonClicked
             );
         }
     }
@@ -229,6 +320,9 @@ public class TowerBuildUI : MonoBehaviour
     /// </summary>
     public void ShowBuildMode()
     {
+        IsUIOpen = true;
+
+
         if (panel != null)
         {
             panel.SetActive(true);
@@ -247,7 +341,26 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
+        // 建設モードのCloseButtonを表示
+        if (buildCloseButton != null)
+        {
+            buildCloseButton.gameObject.SetActive(true);
+        }
+
+
+        // タワー管理モードのCloseButtonを非表示
+        if (towerCloseButton != null)
+        {
+            towerCloseButton.gameObject.SetActive(false);
+        }
+
+
         selectedTowerData = null;
+
+
+        // タワー情報を非表示
+        HideTowerInformation();
+
 
         ClearMessage();
 
@@ -267,15 +380,124 @@ public class TowerBuildUI : MonoBehaviour
 
         selectedTowerData = data;
 
+
+        ShowTowerInformation();
+
+
         UpdateTowerDataDisplay(data);
+
 
         ClearMessage();
     }
 
 
+    // =====================================================
+    // タワー情報表示
+    // =====================================================
+
     /// <summary>
-    /// タワー性能をUIに表示する。
+    /// タワー情報を表示する。
     /// </summary>
+    private void ShowTowerInformation()
+    {
+        if (towerIcon != null)
+        {
+            towerIcon.gameObject.SetActive(true);
+        }
+
+
+        if (towerNameText != null)
+        {
+            towerNameText.gameObject.SetActive(true);
+        }
+
+
+        if (descriptionText != null)
+        {
+            descriptionText.gameObject.SetActive(true);
+        }
+
+
+        if (attackDamageText != null)
+        {
+            attackDamageText.gameObject.SetActive(true);
+        }
+
+
+        if (attackIntervalText != null)
+        {
+            attackIntervalText.gameObject.SetActive(true);
+        }
+
+
+        if (attackRangeText != null)
+        {
+            attackRangeText.gameObject.SetActive(true);
+        }
+
+
+        if (buildCostText != null)
+        {
+            buildCostText.gameObject.SetActive(true);
+        }
+    }
+
+
+    /// <summary>
+    /// タワー情報を非表示にする。
+    /// </summary>
+    private void HideTowerInformation()
+    {
+        if (towerIcon != null)
+        {
+            towerIcon.gameObject.SetActive(false);
+        }
+
+
+        if (towerNameText != null)
+        {
+            towerNameText.gameObject.SetActive(false);
+        }
+
+
+        if (descriptionText != null)
+        {
+            descriptionText.gameObject.SetActive(false);
+        }
+
+
+        if (attackDamageText != null)
+        {
+            attackDamageText.gameObject.SetActive(false);
+        }
+
+
+        if (attackIntervalText != null)
+        {
+            attackIntervalText.gameObject.SetActive(false);
+        }
+
+
+        if (attackRangeText != null)
+        {
+            attackRangeText.gameObject.SetActive(false);
+        }
+
+
+        if (buildCostText != null)
+        {
+            buildCostText.gameObject.SetActive(false);
+        }
+
+
+        HideNextStatus();
+    }
+
+
+    // =====================================================
+    // 建設時のタワー情報
+    // =====================================================
+
     private void UpdateTowerDataDisplay(
         TowerData data)
     {
@@ -328,13 +550,17 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
+        HideNextStatus();
+
+
         UpdateMoneyDisplay();
     }
 
 
-    /// <summary>
-    /// 建設ボタン。
-    /// </summary>
+    // =====================================================
+    // 建設
+    // =====================================================
+
     private void OnBuildButtonClicked()
     {
         if (selectedTowerData == null)
@@ -362,13 +588,16 @@ public class TowerBuildUI : MonoBehaviour
     // =====================================================
 
     /// <summary>
-    /// 建設済みタワーをクリックしたときのUI。
+    /// 建設済みタワーの管理UIを表示する。
     /// </summary>
     public void ShowTowerMode(
         Tower tower)
     {
         if (tower == null)
             return;
+
+
+        IsUIOpen = true;
 
 
         if (panel != null)
@@ -389,7 +618,25 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
+        // 建設モードのCloseButtonを非表示
+        if (buildCloseButton != null)
+        {
+            buildCloseButton.gameObject.SetActive(false);
+        }
+
+
+        // タワー管理モードのCloseButtonを表示
+        if (towerCloseButton != null)
+        {
+            towerCloseButton.gameObject.SetActive(true);
+        }
+
+
+        ShowTowerInformation();
+
+
         ClearMessage();
+
 
         UpdateTowerManagementDisplay(
             tower
@@ -403,6 +650,10 @@ public class TowerBuildUI : MonoBehaviour
     private void UpdateTowerManagementDisplay(
         Tower tower)
     {
+        if (tower == null)
+            return;
+
+
         TowerData data =
             tower.towerData;
 
@@ -411,82 +662,168 @@ public class TowerBuildUI : MonoBehaviour
             return;
 
 
+        // -------------------------------------------------
+        // アイコン
+        // -------------------------------------------------
+
         if (towerIcon != null)
         {
+            towerIcon.gameObject.SetActive(true);
+
             towerIcon.sprite =
                 data.icon;
         }
 
 
+        // -------------------------------------------------
+        // 名前
+        // -------------------------------------------------
+
         if (towerNameText != null)
         {
+            towerNameText.gameObject.SetActive(true);
+
             towerNameText.text =
                 data.towerName;
         }
 
 
+        // -------------------------------------------------
+        // 説明
+        // -------------------------------------------------
+
         if (descriptionText != null)
         {
+            descriptionText.gameObject.SetActive(true);
+
             descriptionText.text =
                 data.description;
         }
 
 
+        // -------------------------------------------------
+        // 現在の攻撃力
+        // -------------------------------------------------
+
         if (attackDamageText != null)
         {
+            attackDamageText.gameObject.SetActive(true);
+
             attackDamageText.text =
                 $"攻撃力：{tower.CurrentAttackDamage}";
         }
 
 
+        // -------------------------------------------------
+        // 現在の攻撃間隔
+        // -------------------------------------------------
+
         if (attackIntervalText != null)
         {
+            attackIntervalText.gameObject.SetActive(true);
+
             attackIntervalText.text =
                 $"攻撃間隔：{tower.CurrentAttackInterval:F1}秒";
         }
 
 
+        // -------------------------------------------------
+        // 現在の射程
+        // -------------------------------------------------
+
         if (attackRangeText != null)
         {
+            attackRangeText.gameObject.SetActive(true);
+
             attackRangeText.text =
                 $"射程：{tower.CurrentAttackRange:F1}";
         }
 
 
+        // -------------------------------------------------
+        // レベル
+        // -------------------------------------------------
+
         if (towerLevelText != null)
         {
+            towerLevelText.gameObject.SetActive(true);
+
             towerLevelText.text =
                 $"Lv.{tower.Level} / {data.maxLevel}";
         }
 
 
-        if (upgradeCostText != null)
+        // -------------------------------------------------
+        // 最大レベル
+        // -------------------------------------------------
+
+        bool isMaxLevel =
+            tower.Level >= data.maxLevel;
+
+
+        if (isMaxLevel)
         {
-            if (tower.Level >= data.maxLevel)
+            HideNextStatus();
+
+
+            if (upgradeCostText != null)
             {
+                upgradeCostText.gameObject.SetActive(true);
+
                 upgradeCostText.text =
                     "最大レベル";
             }
-            else
+
+
+            if (upgradeButton != null)
             {
+                upgradeButton.interactable =
+                    false;
+            }
+        }
+        else
+        {
+            ShowNextStatus(tower);
+
+
+            if (upgradeCostText != null)
+            {
+                upgradeCostText.gameObject.SetActive(true);
+
                 upgradeCostText.text =
                     $"強化費：{tower.GetUpgradeCost()}";
+            }
+
+
+            if (upgradeButton != null)
+            {
+                upgradeButton.interactable =
+                    true;
             }
         }
 
 
+        // -------------------------------------------------
+        // 売却価格
+        // -------------------------------------------------
+
         if (sellPriceText != null)
         {
+            sellPriceText.gameObject.SetActive(true);
+
             sellPriceText.text =
                 $"売却額：{tower.GetSellPrice()}";
         }
 
 
-        // 最大レベルなら強化ボタンを押せなくする
-        if (upgradeButton != null)
+        // -------------------------------------------------
+        // CloseButton
+        // -------------------------------------------------
+
+        if (towerCloseButton != null)
         {
-            upgradeButton.interactable =
-                tower.Level < data.maxLevel;
+            towerCloseButton.gameObject.SetActive(true);
+            towerCloseButton.interactable = true;
         }
 
 
@@ -494,9 +831,72 @@ public class TowerBuildUI : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 強化ボタン。
-    /// </summary>
+    // =====================================================
+    // 次のレベルのステータス
+    // =====================================================
+
+    private void ShowNextStatus(
+        Tower tower)
+    {
+        if (nextAttackDamageText != null)
+        {
+            nextAttackDamageText.gameObject.SetActive(true);
+
+            nextAttackDamageText.text =
+                $"攻撃力\n" +
+                $"{tower.CurrentAttackDamage} → " +
+                $"{tower.GetNextAttackDamage()}";
+        }
+
+
+        if (nextAttackIntervalText != null)
+        {
+            nextAttackIntervalText.gameObject.SetActive(true);
+
+            nextAttackIntervalText.text =
+                $"攻撃間隔\n" +
+                $"{tower.CurrentAttackInterval:F1}秒 → " +
+                $"{tower.GetNextAttackInterval():F1}秒";
+        }
+
+
+        if (nextAttackRangeText != null)
+        {
+            nextAttackRangeText.gameObject.SetActive(true);
+
+            nextAttackRangeText.text =
+                $"射程\n" +
+                $"{tower.CurrentAttackRange:F1} → " +
+                $"{tower.GetNextAttackRange():F1}";
+        }
+    }
+
+
+    private void HideNextStatus()
+    {
+        if (nextAttackDamageText != null)
+        {
+            nextAttackDamageText.gameObject.SetActive(false);
+        }
+
+
+        if (nextAttackIntervalText != null)
+        {
+            nextAttackIntervalText.gameObject.SetActive(false);
+        }
+
+
+        if (nextAttackRangeText != null)
+        {
+            nextAttackRangeText.gameObject.SetActive(false);
+        }
+    }
+
+
+    // =====================================================
+    // 強化
+    // =====================================================
+
     private void OnUpgradeButtonClicked()
     {
         if (TowerPlacementManager.Instance == null)
@@ -508,9 +908,10 @@ public class TowerBuildUI : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 売却ボタン。
-    /// </summary>
+    // =====================================================
+    // 売却
+    // =====================================================
+
     private void OnSellButtonClicked()
     {
         if (TowerPlacementManager.Instance == null)
@@ -523,6 +924,36 @@ public class TowerBuildUI : MonoBehaviour
 
 
     // =====================================================
+    // 建設モードClose
+    // =====================================================
+
+    private void OnBuildCloseButtonClicked()
+    {
+        Debug.Log(
+            "TowerBuildUI: 建設モードのCloseButtonが押されました。"
+        );
+
+
+        Hide();
+    }
+
+
+    // =====================================================
+    // タワー管理モードClose
+    // =====================================================
+
+    private void OnTowerCloseButtonClicked()
+    {
+        Debug.Log(
+            "TowerBuildUI: タワー管理モードのCloseButtonが押されました。"
+        );
+
+
+        Hide();
+    }
+
+
+    // =====================================================
     // 共通
     // =====================================================
 
@@ -531,16 +962,23 @@ public class TowerBuildUI : MonoBehaviour
     /// </summary>
     public void Hide()
     {
+        IsUIOpen = false;
+
+
         if (panel != null)
         {
             panel.SetActive(false);
         }
+
+
+        selectedTowerData = null;
     }
 
 
-    /// <summary>
-    /// 所持金表示を更新する。
-    /// </summary>
+    // =====================================================
+    // 所持金
+    // =====================================================
+
     private void UpdateMoneyDisplay()
     {
         if (moneyText == null)
@@ -561,9 +999,10 @@ public class TowerBuildUI : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// お金が足りない。
-    /// </summary>
+    // =====================================================
+    // メッセージ
+    // =====================================================
+
     public void ShowNotEnoughMoney()
     {
         ShowMessage(
@@ -572,9 +1011,6 @@ public class TowerBuildUI : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// 最大レベル。
-    /// </summary>
     public void ShowMaxLevel()
     {
         ShowMessage(
@@ -583,9 +1019,6 @@ public class TowerBuildUI : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// メッセージを表示する。
-    /// </summary>
     private void ShowMessage(
         string message)
     {
@@ -597,30 +1030,11 @@ public class TowerBuildUI : MonoBehaviour
     }
 
 
-    /// <summary>
-    /// メッセージを消す。
-    /// </summary>
     private void ClearMessage()
     {
         if (messageText != null)
         {
             messageText.text = "";
-        }
-    }
-
-
-    /// <summary>
-    /// 閉じるボタン。
-    /// </summary>
-    private void OnCloseButtonClicked()
-    {
-        if (TowerPlacementManager.Instance != null)
-        {
-            TowerPlacementManager.Instance.CloseUI();
-        }
-        else
-        {
-            Hide();
         }
     }
 }

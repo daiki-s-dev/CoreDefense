@@ -7,14 +7,25 @@ public class TowerPlacementManager : MonoBehaviour
 {
     public static TowerPlacementManager Instance { get; private set; }
 
+
     [Header("UI")]
     public TowerBuildUI buildUI;
+
 
     // 現在選択中の建設地点
     private TowerPlacementPoint selectedPoint;
 
+
     // 現在選択中のタワー
     private Tower selectedTower;
+
+
+    /// <summary>
+    /// UIが開いているか。
+    /// </summary>
+    public bool IsUIOpen =>
+        selectedPoint != null ||
+        selectedTower != null;
 
 
     private void Awake()
@@ -46,11 +57,14 @@ public class TowerPlacementManager : MonoBehaviour
         if (point == null)
             return;
 
+
         if (point.IsOccupied)
             return;
 
+
         selectedPoint = point;
         selectedTower = null;
+
 
         if (buildUI != null)
         {
@@ -67,8 +81,10 @@ public class TowerPlacementManager : MonoBehaviour
         if (tower == null)
             return;
 
+
         selectedTower = tower;
         selectedPoint = null;
+
 
         if (buildUI != null)
         {
@@ -85,8 +101,10 @@ public class TowerPlacementManager : MonoBehaviour
         if (selectedPoint == null)
             return;
 
+
         if (towerData == null)
             return;
+
 
         if (selectedPoint.IsOccupied)
         {
@@ -153,10 +171,12 @@ public class TowerPlacementManager : MonoBehaviour
                 "生成されたTower PrefabにTower.csがありません。"
             );
 
+
             // 建設失敗なので返金
             ResourceManager.Instance.AddMoney(
                 towerData.buildCost
             );
+
 
             Destroy(towerObject);
 
@@ -185,8 +205,10 @@ public class TowerPlacementManager : MonoBehaviour
         if (selectedTower == null)
             return;
 
+
         if (selectedTower.towerData == null)
             return;
+
 
         if (ResourceManager.Instance == null)
         {
@@ -325,6 +347,7 @@ public class TowerPlacementManager : MonoBehaviour
 
         TowerPlacementPoint closestPoint = null;
 
+
         float closestDistance =
             float.MaxValue;
 
@@ -353,13 +376,25 @@ public class TowerPlacementManager : MonoBehaviour
 
 
     /// <summary>
+    /// 選択状態を解除する。
+    /// </summary>
+    public void ClearSelection()
+    {
+        selectedPoint = null;
+        selectedTower = null;
+    }
+
+
+    /// <summary>
     /// UIを閉じる。
     /// </summary>
     public void CloseUI()
     {
-        selectedPoint = null;
-        selectedTower = null;
+        // 選択状態を解除
+        ClearSelection();
 
+
+        // UIを閉じる
         if (buildUI != null)
         {
             buildUI.Hide();
