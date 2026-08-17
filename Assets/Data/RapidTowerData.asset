@@ -16,7 +16,16 @@ MonoBehaviour:
   description: "\u30D0\u30E9\u30F3\u30B9\u306E\u826F\u3044\u57FA\u672C\u30BF\u30EF\u30FC\u3067\u3059\u3002"
   icon: {fileID: 1974001433758262579, guid: 975a46a694f1134458dde004e2c1bbbb, type: 3}
   towerPrefab: {fileID: 7879087255207431067, guid: a6fdefe140cfde64ba7765b10ab32ec3, type: 3}
+  buildCost: 50
   attackDamage: 10
   attackInterval: 1
   attackRange: 3
-  buildCost: 50
+  maxLevel: 3
+  upgradeCost: 100
+  upgradeDamage: 10
+  upgradeIntervalReduction: 0.1
+  upgradeRange: 0.5
+  level1Prefab: {fileID: 7879087255207431067, guid: 29016856132e0fb41a576939c7eec8e3, type: 3}
+  level2Prefab: {fileID: 7879087255207431067, guid: 67956e5a1efbe4240bd415b0006884f0, type: 3}
+  level3Prefab: {fileID: 7879087255207431067, guid: 81ebb5a718427a54bbc3f59e88357998, type: 3}
+  sellRate: 0.5
