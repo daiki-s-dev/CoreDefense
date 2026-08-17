@@ -2,79 +2,83 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// タワーの攻撃を管理する。
-///
-/// 攻撃範囲内にいるEnemyを検知し、
-/// その中からルートを最も先まで進んでいる敵を選択する。
-///
-/// 弾は使用せず、一定間隔ごとに直接ダメージを与える。
+/// タワーの攻撃処理を管理する。
+/// 範囲内の敵から、最も進んでいる敵をターゲットにして攻撃する。
 /// </summary>
 public class Tower : MonoBehaviour
 {
-    [Header("攻撃設定")]
-    [Tooltip("敵に与えるダメージ")]
-    public int attackDamage = 10;
-
-    [Tooltip("攻撃する間隔（秒）")]
-    public float attackInterval = 1f;
-
-    [Tooltip("攻撃範囲")]
-    public float attackRange = 3f;
-
-
-    [Header("ターゲット設定")]
-    [Tooltip("コアに最も近い敵を優先する")]
-    public bool targetFurthestProgressEnemy = true;
-
+    [Header("タワーデータ")]
+    public TowerData towerData;
 
     // 攻撃範囲内にいる敵
     private readonly List<Enemy> enemiesInRange =
         new List<Enemy>();
 
-
-    // 現在攻撃している敵
+    // 現在のターゲット
     private Enemy currentTarget;
 
-
     // 次に攻撃できる時間
-    private float nextAttackTime = 0f;
+    private float nextAttackTime;
 
 
-    #region Unity Lifecycle
+    private CircleCollider2D rangeCollider;
 
-    private void Start()
+
+    private void Awake()
     {
-        // 攻撃範囲を設定
+        rangeCollider =
+            GetComponent<CircleCollider2D>();
+
+        if (rangeCollider == null)
+        {
+            Debug.LogError(
+                $"{gameObject.name}: Circle Collider 2Dがありません。",
+                this
+            );
+
+            return;
+        }
+
+        rangeCollider.isTrigger = true;
+
         UpdateAttackRange();
     }
 
 
     private void Update()
     {
-        // 攻撃対象を探す
-        currentTarget = FindTarget();
+        if (towerData == null)
+            return;
 
+        RemoveInvalidEnemies();
 
-        // 攻撃対象がいなければ何もしない
+        currentTarget = FindMostAdvancedEnemy();
+
         if (currentTarget == null)
             return;
 
-
-        // 攻撃可能な時間になったら攻撃
         if (Time.time >= nextAttackTime)
         {
             Attack();
-
-            // 次回攻撃時間を設定
-            nextAttackTime =
-                Time.time + attackInterval;
         }
     }
 
-    #endregion
 
+    /// <summary>
+    /// タワーの攻撃範囲を設定する。
+    /// </summary>
+    private void UpdateAttackRange()
+    {
+        if (rangeCollider == null)
+            return;
 
-    #region 敵の検知
+        if (towerData == null)
+            return;
+
+        rangeCollider.radius =
+            towerData.attackRange;
+    }
+
 
     /// <summary>
     /// 攻撃範囲に敵が入ったとき。
@@ -82,14 +86,11 @@ public class Tower : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         Enemy enemy =
-            other.GetComponent<Enemy>();
-
+            other.GetComponentInParent<Enemy>();
 
         if (enemy == null)
             return;
 
-
-        // すでに登録されていなければ追加
         if (!enemiesInRange.Contains(enemy))
         {
             enemiesInRange.Add(enemy);
@@ -103,184 +104,78 @@ public class Tower : MonoBehaviour
     private void OnTriggerExit2D(Collider2D other)
     {
         Enemy enemy =
-            other.GetComponent<Enemy>();
-
+            other.GetComponentInParent<Enemy>();
 
         if (enemy == null)
             return;
 
-
         enemiesInRange.Remove(enemy);
 
-
-        // 現在のターゲットだった場合
         if (currentTarget == enemy)
         {
             currentTarget = null;
         }
     }
 
-    #endregion
-
-
-    #region ターゲット選択
 
     /// <summary>
-    /// 攻撃対象を探す。
-    ///
-    /// RouteProgressが最も大きい敵、
-    /// つまりスタート地点から最も先まで進んでいる敵を選択する。
+    /// nullになった敵や死亡した敵をリストから削除する。
     /// </summary>
-    private Enemy FindTarget()
+    private void RemoveInvalidEnemies()
     {
-        // 無効な敵を削除
-        RemoveInvalidEnemies();
+        enemiesInRange.RemoveAll(
+            enemy =>
+                enemy == null ||
+                !enemy.gameObject.activeInHierarchy
+        );
+    }
 
 
-        if (enemiesInRange.Count == 0)
-            return null;
+    /// <summary>
+    /// 範囲内で最も進んでいる敵を探す。
+    /// </summary>
+    private Enemy FindMostAdvancedEnemy()
+    {
+        Enemy bestEnemy = null;
 
-
-        Enemy target = null;
-
-
-        // 最大の進行度
-        float furthestProgress =
-            -Mathf.Infinity;
-
+        float bestProgress = float.MinValue;
 
         foreach (Enemy enemy in enemiesInRange)
         {
             if (enemy == null)
                 continue;
 
-
-            if (enemy.IsDead())
+            if (!enemy.gameObject.activeInHierarchy)
                 continue;
 
-
-            // ルート上の進行度を取得
             float progress =
                 enemy.RouteProgress;
 
-
-            // より先まで進んでいる敵を優先
-            if (progress > furthestProgress)
+            if (progress > bestProgress)
             {
-                furthestProgress = progress;
-                target = enemy;
+                bestProgress = progress;
+                bestEnemy = enemy;
             }
         }
 
-
-        return target;
+        return bestEnemy;
     }
 
 
     /// <summary>
-    /// 死亡・削除された敵をリストから取り除く。
-    /// </summary>
-    private void RemoveInvalidEnemies()
-    {
-        for (int i = enemiesInRange.Count - 1;
-             i >= 0;
-             i--)
-        {
-            Enemy enemy =
-                enemiesInRange[i];
-
-
-            if (enemy == null || enemy.IsDead())
-            {
-                enemiesInRange.RemoveAt(i);
-            }
-        }
-    }
-
-    #endregion
-
-
-    #region 攻撃
-
-    /// <summary>
-    /// 現在のターゲットを攻撃する。
+    /// 敵を攻撃する。
     /// </summary>
     private void Attack()
     {
         if (currentTarget == null)
             return;
 
-
-        // 敵にダメージを与える
         currentTarget.TakeDamage(
-            attackDamage
+            towerData.attackDamage
         );
 
-
-        Debug.Log(
-            $"{gameObject.name} が " +
-            $"{currentTarget.gameObject.name} に " +
-            $"{attackDamage} ダメージを与えました。" +
-            $" RouteProgress: " +
-            $"{currentTarget.RouteProgress:F2}"
-        );
+        nextAttackTime =
+            Time.time +
+            towerData.attackInterval;
     }
-
-    #endregion
-
-
-    #region 攻撃範囲
-
-    /// <summary>
-    /// CircleCollider2Dの攻撃範囲を設定する。
-    /// </summary>
-    private void UpdateAttackRange()
-    {
-        CircleCollider2D circleCollider =
-            GetComponent<CircleCollider2D>();
-
-
-        if (circleCollider == null)
-        {
-            Debug.LogWarning(
-                $"{gameObject.name}: " +
-                "CircleCollider2Dがありません。",
-                this
-            );
-
-            return;
-        }
-
-
-        circleCollider.radius =
-            attackRange;
-
-
-        circleCollider.isTrigger =
-            true;
-    }
-
-    #endregion
-
-
-    #region 外部からの操作
-
-    /// <summary>
-    /// タワーの攻撃を停止する。
-    /// </summary>
-    public void StopAttack()
-    {
-        enabled = false;
-    }
-
-
-    /// <summary>
-    /// タワーの攻撃を再開する。
-    /// </summary>
-    public void ResumeAttack()
-    {
-        enabled = true;
-    }
-
-    #endregion
 }

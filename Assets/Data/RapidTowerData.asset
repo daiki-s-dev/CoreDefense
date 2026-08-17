@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d41b68fdc49683c4cb6bbb2e742a2daa, type: 3}
+  m_Name: RapidTowerData
+  m_EditorClassIdentifier: 
+  towerName: "\u9AD8\u901F\u30BF\u30EF\u30FC"
+  description: "\u30D0\u30E9\u30F3\u30B9\u306E\u826F\u3044\u57FA\u672C\u30BF\u30EF\u30FC\u3067\u3059\u3002"
+  icon: {fileID: 1974001433758262579, guid: 975a46a694f1134458dde004e2c1bbbb, type: 3}
+  towerPrefab: {fileID: 7879087255207431067, guid: a6fdefe140cfde64ba7765b10ab32ec3, type: 3}
+  attackDamage: 10
+  attackInterval: 1
+  attackRange: 3
+  buildCost: 50
