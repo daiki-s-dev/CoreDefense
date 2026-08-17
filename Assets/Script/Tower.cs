@@ -2,15 +2,28 @@ using System.Collections.Generic;
 using UnityEngine;
 
 /// <summary>
-/// タワーの攻撃処理を管理する。
-/// 範囲内の敵から、最も進んでいる敵をターゲットにして攻撃する。
+/// タワーの攻撃・レベル・強化・売却を管理する。
+/// 範囲内で最も進んでいる敵を攻撃する。
 /// </summary>
 public class Tower : MonoBehaviour
 {
     [Header("タワーデータ")]
     public TowerData towerData;
 
-    // 攻撃範囲内にいる敵
+    // 現在のレベル
+    [SerializeField]
+    private int level = 1;
+
+    // 現在の攻撃力
+    private int currentAttackDamage;
+
+    // 現在の攻撃間隔
+    private float currentAttackInterval;
+
+    // 現在の攻撃範囲
+    private float currentAttackRange;
+
+    // 攻撃範囲内の敵
     private readonly List<Enemy> enemiesInRange =
         new List<Enemy>();
 
@@ -20,8 +33,32 @@ public class Tower : MonoBehaviour
     // 次に攻撃できる時間
     private float nextAttackTime;
 
-
+    // 攻撃範囲Collider
     private CircleCollider2D rangeCollider;
+
+
+    /// <summary>
+    /// 現在のレベル。
+    /// </summary>
+    public int Level => level;
+
+    /// <summary>
+    /// 現在の攻撃力。
+    /// </summary>
+    public int CurrentAttackDamage =>
+        currentAttackDamage;
+
+    /// <summary>
+    /// 現在の攻撃間隔。
+    /// </summary>
+    public float CurrentAttackInterval =>
+        currentAttackInterval;
+
+    /// <summary>
+    /// 現在の攻撃範囲。
+    /// </summary>
+    public float CurrentAttackRange =>
+        currentAttackRange;
 
 
     private void Awake()
@@ -41,7 +78,7 @@ public class Tower : MonoBehaviour
 
         rangeCollider.isTrigger = true;
 
-        UpdateAttackRange();
+        ApplyStats();
     }
 
 
@@ -52,7 +89,8 @@ public class Tower : MonoBehaviour
 
         RemoveInvalidEnemies();
 
-        currentTarget = FindMostAdvancedEnemy();
+        currentTarget =
+            FindMostAdvancedEnemy();
 
         if (currentTarget == null)
             return;
@@ -65,23 +103,106 @@ public class Tower : MonoBehaviour
 
 
     /// <summary>
-    /// タワーの攻撃範囲を設定する。
+    /// タワーをクリックしたとき。
     /// </summary>
-    private void UpdateAttackRange()
+    private void OnMouseDown()
     {
-        if (rangeCollider == null)
+        if (TowerPlacementManager.Instance == null)
             return;
 
-        if (towerData == null)
-            return;
-
-        rangeCollider.radius =
-            towerData.attackRange;
+        TowerPlacementManager.Instance.OpenTowerUI(this);
     }
 
 
     /// <summary>
-    /// 攻撃範囲に敵が入ったとき。
+    /// TowerDataを基準に現在の性能を計算する。
+    /// </summary>
+    private void ApplyStats()
+    {
+        if (towerData == null)
+            return;
+
+        currentAttackDamage =
+            towerData.attackDamage
+            + towerData.upgradeDamage * (level - 1);
+
+        currentAttackRange =
+            towerData.attackRange
+            + towerData.upgradeRange * (level - 1);
+
+        currentAttackInterval =
+            towerData.attackInterval
+            - towerData.upgradeIntervalReduction * (level - 1);
+
+        // 攻撃間隔が0以下にならないようにする
+        currentAttackInterval =
+            Mathf.Max(0.1f, currentAttackInterval);
+
+        if (rangeCollider != null)
+        {
+            rangeCollider.radius =
+                currentAttackRange;
+        }
+    }
+
+
+    /// <summary>
+    /// タワーを強化する。
+    /// </summary>
+    public bool Upgrade()
+    {
+        if (towerData == null)
+            return false;
+
+        if (level >= towerData.maxLevel)
+            return false;
+
+        level++;
+
+        ApplyStats();
+
+        return true;
+    }
+
+
+    /// <summary>
+    /// 次のレベルに必要な強化費用。
+    /// </summary>
+    public int GetUpgradeCost()
+    {
+        if (towerData == null)
+            return 0;
+
+        return towerData.upgradeCost * level;
+    }
+
+
+    /// <summary>
+    /// 売却時に返ってくる金額。
+    /// </summary>
+    public int GetSellPrice()
+    {
+        if (towerData == null)
+            return 0;
+
+        int totalCost =
+            towerData.buildCost;
+
+        // これまでの強化費用も含める
+        for (int i = 1; i < level; i++)
+        {
+            totalCost +=
+                towerData.upgradeCost * i;
+        }
+
+        return Mathf.FloorToInt(
+            totalCost * towerData.sellRate
+        );
+    }
+
+
+    /// <summary>
+    /// 攻撃範囲に敵が入った。
     /// </summary>
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -99,7 +220,7 @@ public class Tower : MonoBehaviour
 
 
     /// <summary>
-    /// 攻撃範囲から敵が出たとき。
+    /// 攻撃範囲から敵が出た。
     /// </summary>
     private void OnTriggerExit2D(Collider2D other)
     {
@@ -119,7 +240,7 @@ public class Tower : MonoBehaviour
 
 
     /// <summary>
-    /// nullになった敵や死亡した敵をリストから削除する。
+    /// 無効になった敵を削除する。
     /// </summary>
     private void RemoveInvalidEnemies()
     {
@@ -132,13 +253,14 @@ public class Tower : MonoBehaviour
 
 
     /// <summary>
-    /// 範囲内で最も進んでいる敵を探す。
+    /// 最も進んでいる敵を取得する。
     /// </summary>
     private Enemy FindMostAdvancedEnemy()
     {
         Enemy bestEnemy = null;
 
-        float bestProgress = float.MinValue;
+        float bestProgress =
+            float.MinValue;
 
         foreach (Enemy enemy in enemiesInRange)
         {
@@ -171,11 +293,11 @@ public class Tower : MonoBehaviour
             return;
 
         currentTarget.TakeDamage(
-            towerData.attackDamage
+            currentAttackDamage
         );
 
         nextAttackTime =
             Time.time +
-            towerData.attackInterval;
+            currentAttackInterval;
     }
 }

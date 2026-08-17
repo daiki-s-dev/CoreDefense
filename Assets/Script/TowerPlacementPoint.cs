@@ -8,16 +8,33 @@ public class TowerPlacementPoint : MonoBehaviour
     [Header("表示")]
     public GameObject availableIndicator;
 
-    [Header("設定")]
-    [Tooltip("この場所に建設済みか")]
+    [Header("状態")]
     [SerializeField]
     private bool isOccupied = false;
 
+    // この場所に建設されているタワー
+    private Tower placedTower;
+
+    // 建設地点のCollider
+    private Collider2D pointCollider;
+
 
     /// <summary>
-    /// 建設済みか。
+    /// 現在タワーが建設されているか。
     /// </summary>
     public bool IsOccupied => isOccupied;
+
+
+    /// <summary>
+    /// 現在建設されているタワー。
+    /// </summary>
+    public Tower PlacedTower => placedTower;
+
+
+    private void Awake()
+    {
+        pointCollider = GetComponent<Collider2D>();
+    }
 
 
     private void Start()
@@ -31,11 +48,9 @@ public class TowerPlacementPoint : MonoBehaviour
     /// </summary>
     private void OnMouseDown()
     {
+        // すでにタワーがある場合は何もしない
         if (isOccupied)
-        {
-            Debug.Log("この場所にはすでにタワーがあります。");
             return;
-        }
 
         if (TowerPlacementManager.Instance == null)
         {
@@ -51,11 +66,46 @@ public class TowerPlacementPoint : MonoBehaviour
 
 
     /// <summary>
-    /// タワー建設済みにする。
+    /// タワーを建設したことを登録する。
     /// </summary>
-    public void SetOccupied()
+    public void SetOccupied(Tower tower)
     {
+        if (tower == null)
+        {
+            Debug.LogWarning(
+                "TowerPlacementPoint: nullのTowerを登録しようとしました。"
+            );
+
+            return;
+        }
+
         isOccupied = true;
+        placedTower = tower;
+
+        UpdateIndicator();
+
+        // 建設地点自身のColliderを無効化
+        // タワーのColliderでクリックできるようにする
+        if (pointCollider != null)
+        {
+            pointCollider.enabled = false;
+        }
+    }
+
+
+    /// <summary>
+    /// タワー売却後に建設地点を再利用可能にする。
+    /// </summary>
+    public void ResetPoint()
+    {
+        isOccupied = false;
+        placedTower = null;
+
+        // 建設地点のColliderを再び有効化
+        if (pointCollider != null)
+        {
+            pointCollider.enabled = true;
+        }
 
         UpdateIndicator();
     }
