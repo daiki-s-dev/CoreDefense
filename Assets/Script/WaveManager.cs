@@ -681,10 +681,20 @@ public class WaveManager : MonoBehaviour
                 "========== GAME CLEAR =========="
             );
 
-
             HideWaveStartButton();
-
             HideNextWaveText();
+
+            // ClearScene‚ÖˆÚ“®
+            if (SceneController.Instance != null)
+            {
+                SceneController.Instance.LoadClear();
+            }
+            else
+            {
+                Debug.LogError(
+                    "WaveManager: SceneController.Instance ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB"
+                );
+            }
         }
 
 

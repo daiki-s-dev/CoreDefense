@@ -59,15 +59,27 @@ public class TowerBuildUI : MonoBehaviour
 
 
     // =====================================================
-    // 現在のステータス
+    // 建設モード：現在のステータス
     // =====================================================
 
-    [Header("現在のステータス")]
+    [Header("建設モード：現在のステータス")]
     public TMP_Text attackDamageText;
 
     public TMP_Text attackIntervalText;
 
     public TMP_Text attackRangeText;
+
+
+    // =====================================================
+    // タワー管理モード：現在のステータス
+    // =====================================================
+
+    [Header("タワー管理モード：現在のステータス")]
+    public TMP_Text towerModeAttackDamageText;
+
+    public TMP_Text towerModeAttackIntervalText;
+
+    public TMP_Text towerModeAttackRangeText;
 
 
     // =====================================================
@@ -118,13 +130,11 @@ public class TowerBuildUI : MonoBehaviour
     [Header("タワー管理モード")]
     public GameObject towerModePanel;
 
-
     public TMP_Text towerLevelText;
 
     public TMP_Text upgradeCostText;
 
     public TMP_Text sellPriceText;
-
 
     public Button upgradeButton;
 
@@ -147,7 +157,10 @@ public class TowerBuildUI : MonoBehaviour
     public TMP_Text messageText;
 
 
+    // =====================================================
     // 現在選択しているタワーデータ
+    // =====================================================
+
     private TowerData selectedTowerData;
 
 
@@ -427,6 +440,10 @@ public class TowerBuildUI : MonoBehaviour
     /// </summary>
     private void ShowTowerInformation()
     {
+        // -------------------------------------------------
+        // 共通情報
+        // -------------------------------------------------
+
         if (towerIcon != null)
         {
             towerIcon.gameObject.SetActive(true);
@@ -444,6 +461,10 @@ public class TowerBuildUI : MonoBehaviour
             descriptionText.gameObject.SetActive(true);
         }
 
+
+        // -------------------------------------------------
+        // 建設モードの現在ステータス
+        // -------------------------------------------------
 
         if (attackDamageText != null)
         {
@@ -463,6 +484,32 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
+        // タワー管理モードの現在ステータス
+        // -------------------------------------------------
+
+        if (towerModeAttackDamageText != null)
+        {
+            towerModeAttackDamageText.gameObject.SetActive(true);
+        }
+
+
+        if (towerModeAttackIntervalText != null)
+        {
+            towerModeAttackIntervalText.gameObject.SetActive(true);
+        }
+
+
+        if (towerModeAttackRangeText != null)
+        {
+            towerModeAttackRangeText.gameObject.SetActive(true);
+        }
+
+
+        // -------------------------------------------------
+        // 建設費
+        // -------------------------------------------------
+
         if (buildCostText != null)
         {
             buildCostText.gameObject.SetActive(true);
@@ -475,6 +522,10 @@ public class TowerBuildUI : MonoBehaviour
     /// </summary>
     private void HideTowerInformation()
     {
+        // -------------------------------------------------
+        // 共通情報
+        // -------------------------------------------------
+
         if (towerIcon != null)
         {
             towerIcon.gameObject.SetActive(false);
@@ -493,6 +544,10 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
+        // 建設モードの現在ステータス
+        // -------------------------------------------------
+
         if (attackDamageText != null)
         {
             attackDamageText.gameObject.SetActive(false);
@@ -510,6 +565,32 @@ public class TowerBuildUI : MonoBehaviour
             attackRangeText.gameObject.SetActive(false);
         }
 
+
+        // -------------------------------------------------
+        // タワー管理モードの現在ステータス
+        // -------------------------------------------------
+
+        if (towerModeAttackDamageText != null)
+        {
+            towerModeAttackDamageText.gameObject.SetActive(false);
+        }
+
+
+        if (towerModeAttackIntervalText != null)
+        {
+            towerModeAttackIntervalText.gameObject.SetActive(false);
+        }
+
+
+        if (towerModeAttackRangeText != null)
+        {
+            towerModeAttackRangeText.gameObject.SetActive(false);
+        }
+
+
+        // -------------------------------------------------
+        // 建設費
+        // -------------------------------------------------
 
         if (buildCostText != null)
         {
@@ -549,6 +630,10 @@ public class TowerBuildUI : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
+        // 建設モードの現在ステータス
+        // -------------------------------------------------
+
         if (attackDamageText != null)
         {
             attackDamageText.text =
@@ -569,6 +654,10 @@ public class TowerBuildUI : MonoBehaviour
                 $"射程：{data.attackRange:F1}";
         }
 
+
+        // -------------------------------------------------
+        // 建設費
+        // -------------------------------------------------
 
         if (buildCostText != null)
         {
@@ -736,11 +825,11 @@ public class TowerBuildUI : MonoBehaviour
         // 現在の攻撃力
         // -------------------------------------------------
 
-        if (attackDamageText != null)
+        if (towerModeAttackDamageText != null)
         {
-            attackDamageText.gameObject.SetActive(true);
+            towerModeAttackDamageText.gameObject.SetActive(true);
 
-            attackDamageText.text =
+            towerModeAttackDamageText.text =
                 $"攻撃力：{tower.CurrentAttackDamage}";
         }
 
@@ -749,11 +838,11 @@ public class TowerBuildUI : MonoBehaviour
         // 現在の攻撃間隔
         // -------------------------------------------------
 
-        if (attackIntervalText != null)
+        if (towerModeAttackIntervalText != null)
         {
-            attackIntervalText.gameObject.SetActive(true);
+            towerModeAttackIntervalText.gameObject.SetActive(true);
 
-            attackIntervalText.text =
+            towerModeAttackIntervalText.text =
                 $"攻撃間隔：{tower.CurrentAttackInterval:F1}秒";
         }
 
@@ -762,11 +851,11 @@ public class TowerBuildUI : MonoBehaviour
         // 現在の射程
         // -------------------------------------------------
 
-        if (attackRangeText != null)
+        if (towerModeAttackRangeText != null)
         {
-            attackRangeText.gameObject.SetActive(true);
+            towerModeAttackRangeText.gameObject.SetActive(true);
 
-            attackRangeText.text =
+            towerModeAttackRangeText.text =
                 $"射程：{tower.CurrentAttackRange:F1}";
         }
 
