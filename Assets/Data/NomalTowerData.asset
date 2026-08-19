@@ -16,8 +16,8 @@ MonoBehaviour:
   description: "\u30D0\u30E9\u30F3\u30B9\u306E\u826F\u3044\u57FA\u672C\u30BF\u30EF\u30FC"
   icon: {fileID: -6470460504253458178, guid: 21b0ac0d51373b64ab3e40c3c0143c18, type: 3}
   buildCost: 50
-  attackDamage: 12
-  attackInterval: 2
+  attackDamage: 20
+  attackInterval: 1
   attackRange: 3
   maxLevel: 3
   upgradeCost: 100

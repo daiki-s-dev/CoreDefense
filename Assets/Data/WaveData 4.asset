@@ -16,34 +16,34 @@ MonoBehaviour:
   startDelay: 2
   endDelay: 3
   useNorth: 1
-  northEnemyCount: 10
+  northEnemyCount: 19
   northEnemyGroups:
   - enemyPrefabs:
     - {fileID: 4480682840864639223, guid: 498ca4da4effb1249922b847efe050d1, type: 3}
     - {fileID: 8455779369675863484, guid: 09b273bfc490a9348bcf6f159e72a1ba, type: 3}
     - {fileID: 2967701647171358042, guid: 4b4ca480b5ba8dc438307048cb194f54, type: 3}
-    spawnInterval: 1.5
+    spawnInterval: 1
   useSouth: 1
-  southEnemyCount: 10
+  southEnemyCount: 18
   southEnemyGroups:
   - enemyPrefabs:
     - {fileID: 4480682840864639223, guid: 498ca4da4effb1249922b847efe050d1, type: 3}
     - {fileID: 8455779369675863484, guid: 09b273bfc490a9348bcf6f159e72a1ba, type: 3}
     - {fileID: 2967701647171358042, guid: 4b4ca480b5ba8dc438307048cb194f54, type: 3}
-    spawnInterval: 1.5
+    spawnInterval: 1
   useEast: 1
-  eastEnemyCount: 10
+  eastEnemyCount: 18
   eastEnemyGroups:
   - enemyPrefabs:
     - {fileID: 4480682840864639223, guid: 498ca4da4effb1249922b847efe050d1, type: 3}
     - {fileID: 8455779369675863484, guid: 09b273bfc490a9348bcf6f159e72a1ba, type: 3}
     - {fileID: 2967701647171358042, guid: 4b4ca480b5ba8dc438307048cb194f54, type: 3}
-    spawnInterval: 1.5
+    spawnInterval: 1
   useWest: 1
-  westEnemyCount: 10
+  westEnemyCount: 18
   westEnemyGroups:
   - enemyPrefabs:
     - {fileID: 4480682840864639223, guid: 498ca4da4effb1249922b847efe050d1, type: 3}
     - {fileID: 8455779369675863484, guid: 09b273bfc490a9348bcf6f159e72a1ba, type: 3}
     - {fileID: 2967701647171358042, guid: 4b4ca480b5ba8dc438307048cb194f54, type: 3}
-    spawnInterval: 1.5
+    spawnInterval: 1

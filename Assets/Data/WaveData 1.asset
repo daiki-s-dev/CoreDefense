@@ -20,7 +20,7 @@ MonoBehaviour:
   northEnemyGroups:
   - enemyPrefabs:
     - {fileID: 4480682840864639223, guid: 498ca4da4effb1249922b847efe050d1, type: 3}
-    spawnInterval: 2
+    spawnInterval: 1
   useSouth: 0
   southEnemyCount: 0
   southEnemyGroups: []
