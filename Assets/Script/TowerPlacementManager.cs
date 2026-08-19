@@ -4,7 +4,7 @@ using UnityEngine;
 /// タワーの建設・強化・売却・クリック判定・UI選択を管理する。
 ///
 /// クリック判定はOnMouseDownを使わず、
-/// 画面上のクリック位置からPhysics2D.Raycastを行う。
+/// 画面上のクリック位置からPhysics2D.OverlapPointを行う。
 /// </summary>
 public class TowerPlacementManager : MonoBehaviour
 {
@@ -272,7 +272,10 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
         // お金確認
+        // -------------------------------------------------
+
         if (!ResourceManager.Instance.CanAfford(
             towerData.buildCost))
         {
@@ -282,7 +285,10 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
         // Prefab確認
+        // -------------------------------------------------
+
         if (towerData.towerPrefab == null)
         {
             Debug.LogError(
@@ -294,7 +300,10 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
         // お金を消費
+        // -------------------------------------------------
+
         if (!ResourceManager.Instance.SpendMoney(
             towerData.buildCost))
         {
@@ -325,6 +334,7 @@ public class TowerPlacementManager : MonoBehaviour
             );
 
 
+            // 建設失敗なのでお金を返す
             ResourceManager.Instance.AddMoney(
                 towerData.buildCost
             );
@@ -336,22 +346,46 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
         // TowerData設定
+        // -------------------------------------------------
+
         tower.towerData =
             towerData;
 
 
+        // -------------------------------------------------
         // Tower初期化
+        // -------------------------------------------------
+
         tower.InitializeTower();
 
 
+        // -------------------------------------------------
         // 建設地点登録
+        // -------------------------------------------------
+
         selectedPoint.SetOccupied(
             tower
         );
 
 
+        // -------------------------------------------------
+        // 建設SE
+        // -------------------------------------------------
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(
+                AudioManager.SEType.TowerBuild
+            );
+        }
+
+
+        // -------------------------------------------------
         // UIを閉じる
+        // -------------------------------------------------
+
         CloseUI();
     }
 
@@ -384,7 +418,10 @@ public class TowerPlacementManager : MonoBehaviour
             selectedTower.towerData;
 
 
+        // -------------------------------------------------
         // 最大レベル
+        // -------------------------------------------------
+
         if (selectedTower.Level >=
             data.maxLevel)
         {
@@ -398,7 +435,10 @@ public class TowerPlacementManager : MonoBehaviour
             selectedTower.GetUpgradeCost();
 
 
+        // -------------------------------------------------
         // お金確認
+        // -------------------------------------------------
+
         if (!ResourceManager.Instance.CanAfford(
             upgradeCost))
         {
@@ -408,7 +448,10 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
         // お金を消費
+        // -------------------------------------------------
+
         if (!ResourceManager.Instance.SpendMoney(
             upgradeCost))
         {
@@ -416,13 +459,17 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
         // 強化
+        // -------------------------------------------------
+
         bool success =
             selectedTower.Upgrade();
 
 
         if (!success)
         {
+            // 強化失敗時はお金を返す
             ResourceManager.Instance.AddMoney(
                 upgradeCost
             );
@@ -431,7 +478,22 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
+        // 強化SE
+        // -------------------------------------------------
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(
+                AudioManager.SEType.TowerUpgrade
+            );
+        }
+
+
+        // -------------------------------------------------
         // UI更新
+        // -------------------------------------------------
+
         if (buildUI != null)
         {
             buildUI.ShowTowerMode(
@@ -461,9 +523,17 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
+        // 売却価格
+        // -------------------------------------------------
+
         int sellPrice =
             selectedTower.GetSellPrice();
 
+
+        // -------------------------------------------------
+        // 建設地点を取得
+        // -------------------------------------------------
 
         TowerPlacementPoint point =
             FindPlacementPoint(
@@ -471,10 +541,18 @@ public class TowerPlacementManager : MonoBehaviour
             );
 
 
+        // -------------------------------------------------
+        // タワー削除
+        // -------------------------------------------------
+
         Destroy(
             selectedTower.gameObject
         );
 
+
+        // -------------------------------------------------
+        // 建設地点を空き状態に戻す
+        // -------------------------------------------------
 
         if (point != null)
         {
@@ -482,10 +560,30 @@ public class TowerPlacementManager : MonoBehaviour
         }
 
 
+        // -------------------------------------------------
+        // お金を追加
+        // -------------------------------------------------
+
         ResourceManager.Instance.AddMoney(
             sellPrice
         );
 
+
+        // -------------------------------------------------
+        // 売却SE
+        // -------------------------------------------------
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(
+                AudioManager.SEType.TowerSell
+            );
+        }
+
+
+        // -------------------------------------------------
+        // UIを閉じる
+        // -------------------------------------------------
 
         CloseUI();
     }

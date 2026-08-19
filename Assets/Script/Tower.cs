@@ -554,6 +554,10 @@ public class Tower : MonoBehaviour
     }
 
 
+    // =====================================================
+    // Å‚ài‚ñ‚Å‚¢‚é“G‚ğæ“¾
+    // =====================================================
+
     private Enemy FindMostAdvancedEnemy()
     {
         Enemy bestEnemy = null;
@@ -582,6 +586,7 @@ public class Tower : MonoBehaviour
                 bestProgress =
                     progress;
 
+
                 bestEnemy =
                     enemy;
             }
@@ -602,10 +607,30 @@ public class Tower : MonoBehaviour
             return;
 
 
+        // -------------------------------------------------
+        // “G‚Éƒ_ƒ[ƒW
+        // -------------------------------------------------
+
         currentTarget.TakeDamage(
             currentAttackDamage
         );
 
+
+        // -------------------------------------------------
+        // UŒ‚SE
+        // -------------------------------------------------
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(
+                AudioManager.SEType.TowerAttack
+            );
+        }
+
+
+        // -------------------------------------------------
+        // Ÿ‰ñUŒ‚ŠÔ
+        // -------------------------------------------------
 
         nextAttackTime =
             Time.time +
@@ -665,11 +690,16 @@ public class Tower : MonoBehaviour
     }
 
 
+    // =====================================================
+    // UŒ‚”ÍˆÍ•\¦ON
+    // =====================================================
+
     public void ShowAttackRange()
     {
         if (attackRangeVisualInstance == null)
         {
             UpdateAttackRangeVisual();
+
             return;
         }
 
@@ -677,6 +707,10 @@ public class Tower : MonoBehaviour
         attackRangeVisualInstance.SetActive(true);
     }
 
+
+    // =====================================================
+    // UŒ‚”ÍˆÍ•\¦OFF
+    // =====================================================
 
     public void HideAttackRange()
     {

@@ -25,6 +25,7 @@ public class Enemy : MonoBehaviour
     // =====================================================
     // 報酬設定
     // =====================================================
+
     [Header("撃破報酬")]
     [Tooltip("この敵を倒したときに獲得するお金")]
     public int killReward = 10;
@@ -259,6 +260,29 @@ public class Enemy : MonoBehaviour
 
 
         // =================================================
+        // 死亡判定
+        // =================================================
+
+        if (CurrentHP <= 0)
+        {
+            // HPが0になった場合は
+            // 被ダメージSEではなく死亡SEを再生
+            PlayDeathSE();
+
+            Die();
+
+            return;
+        }
+
+
+        // =================================================
+        // 被ダメージSE
+        // =================================================
+
+        PlayDamageSE();
+
+
+        // =================================================
         // 被ダメージ演出
         // =================================================
 
@@ -266,16 +290,44 @@ public class Enemy : MonoBehaviour
         {
             animationController.PlayDamageEffect();
         }
+    }
 
 
-        // =================================================
-        // 死亡判定
-        // =================================================
+    // =====================================================
+    // 被ダメージSE
+    // =====================================================
 
-        if (CurrentHP <= 0)
-        {
-            Die();
-        }
+    /// <summary>
+    /// 敵がダメージを受けたときのSEを再生する。
+    /// </summary>
+    private void PlayDamageSE()
+    {
+        if (AudioManager.Instance == null)
+            return;
+
+
+        AudioManager.Instance.PlaySE(
+            AudioManager.SEType.EnemyDamage
+        );
+    }
+
+
+    // =====================================================
+    // 死亡SE
+    // =====================================================
+
+    /// <summary>
+    /// 敵が倒されたときのSEを再生する。
+    /// </summary>
+    private void PlayDeathSE()
+    {
+        if (AudioManager.Instance == null)
+            return;
+
+
+        AudioManager.Instance.PlaySE(
+            AudioManager.SEType.EnemyDeath
+        );
     }
 
 

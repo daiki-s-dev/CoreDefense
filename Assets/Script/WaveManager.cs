@@ -380,6 +380,30 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
+        // Wave BGMへ切り替え
+        // -------------------------------------------------
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM(
+                AudioManager.BGMType.GameWave
+            );
+        }
+
+
+        // -------------------------------------------------
+        // Wave開始SE
+        // -------------------------------------------------
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlaySE(
+                AudioManager.SEType.WaveStart
+            );
+        }
+
+
+        // -------------------------------------------------
         // Spawner開始
         // -------------------------------------------------
 
@@ -634,6 +658,18 @@ public class WaveManager : MonoBehaviour
         );
 
 
+        // =================================================
+        // 開始前BGMへ戻す
+        // =================================================
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayBGM(
+                AudioManager.BGMType.GamePreparation
+            );
+        }
+
+
         // -------------------------------------------------
         // Waveクリア表示
         // -------------------------------------------------
@@ -681,8 +717,32 @@ public class WaveManager : MonoBehaviour
                 "========== GAME CLEAR =========="
             );
 
+
+            // =================================================
+            // BGM停止
+            // =================================================
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.StopBGM();
+            }
+
+
+            // =================================================
+            // ゲームクリアSE
+            // =================================================
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySE(
+                    AudioManager.SEType.GameClear
+                );
+            }
+
+
             HideWaveStartButton();
             HideNextWaveText();
+
 
             // ClearSceneへ移動
             if (SceneController.Instance != null)
