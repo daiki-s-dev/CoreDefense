@@ -1,20 +1,20 @@
-using System.Collections;
+ï»¿using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>
-/// Wave‘S‘Ì‚ğŠÇ—‚·‚éB
+/// Waveå…¨ä½“ã‚’ç®¡ç†ã™ã‚‹ã€‚
 ///
-/// EWaveŠJnƒ{ƒ^ƒ“
-/// EWaveis
-/// E4•ûŒüSpawner
-/// E“G‚Ì‘”ŠÇ—
-/// E“G‚Ìc”ŠÇ—
-/// EWaveƒNƒŠƒA”»’è
-/// EWave UI
-/// EŸWaveŠJn•\¦
+/// ãƒ»Waveé–‹å§‹ãƒœã‚¿ãƒ³
+/// ãƒ»Waveé€²è¡Œ
+/// ãƒ»4æ–¹å‘Spawner
+/// ãƒ»æ•µã®ç·æ•°ç®¡ç†
+/// ãƒ»æ•µã®æ®‹æ•°ç®¡ç†
+/// ãƒ»Waveã‚¯ãƒªã‚¢åˆ¤å®š
+/// ãƒ»Wave UI
+/// ãƒ»æ¬¡Waveé–‹å§‹è¡¨ç¤º
 /// </summary>
 public class WaveManager : MonoBehaviour
 {
@@ -30,10 +30,10 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // 4•ûŒüSpawner
+    // 4æ–¹å‘Spawner
     // =====================================================
 
-    [Header("4•ûŒüSpawner")]
+    [Header("4æ–¹å‘Spawner")]
 
     public EnemySpawner northSpawner;
 
@@ -45,16 +45,16 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // WaveŠJnƒ{ƒ^ƒ“
+    // Waveé–‹å§‹ãƒœã‚¿ãƒ³
     // =====================================================
 
-    [Header("WaveŠJnƒ{ƒ^ƒ“")]
+    [Header("Waveé–‹å§‹ãƒœã‚¿ãƒ³")]
 
-    [Tooltip("WaveŠJnƒ{ƒ^ƒ“")]
+    [Tooltip("Waveé–‹å§‹ãƒœã‚¿ãƒ³")]
     public Button waveStartButton;
 
 
-    [Tooltip("WaveŠJnƒ{ƒ^ƒ“‘S‘Ì")]
+    [Tooltip("Waveé–‹å§‹ãƒœã‚¿ãƒ³å…¨ä½“")]
     public GameObject waveStartButtonObject;
 
 
@@ -64,38 +64,38 @@ public class WaveManager : MonoBehaviour
 
     [Header("Wave UI")]
 
-    [Tooltip("Œ»İ‚ÌWave")]
+    [Tooltip("ç¾åœ¨ã®Wave")]
     public TMP_Text waveText;
 
 
-    [Tooltip("c‚è“G”")]
+    [Tooltip("æ®‹ã‚Šæ•µæ•°")]
     public TMP_Text enemyCountText;
 
 
-    [Tooltip("WaveƒNƒŠƒA•\¦")]
+    [Tooltip("Waveã‚¯ãƒªã‚¢è¡¨ç¤º")]
     public TMP_Text waveClearText;
 
 
-    [Tooltip("Ÿ‚ÌWave•\¦")]
+    [Tooltip("æ¬¡ã®Waveè¡¨ç¤º")]
     public TMP_Text nextWaveText;
 
 
-    [Tooltip("WaveƒNƒŠƒA•\¦ŠÔ")]
+    [Tooltip("Waveã‚¯ãƒªã‚¢è¡¨ç¤ºæ™‚é–“")]
     public float waveClearDisplayTime = 2f;
 
 
     // =====================================================
-    // ó‘Ô
+    // çŠ¶æ…‹
     // =====================================================
 
-    [Header("ó‘Ô")]
+    [Header("çŠ¶æ…‹")]
 
     [SerializeField]
     private int currentWaveIndex = -1;
 
 
     /// <summary>
-    /// Œ»İ‚ÌWave”Ô†B
+    /// ç¾åœ¨ã®Waveç•ªå·ã€‚
     /// </summary>
     public int CurrentWave
     {
@@ -107,7 +107,7 @@ public class WaveManager : MonoBehaviour
 
 
     /// <summary>
-    /// Wave‚ªis’†‚©B
+    /// WaveãŒé€²è¡Œä¸­ã‹ã€‚
     /// </summary>
     public bool IsWaveRunning
     {
@@ -117,19 +117,19 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // “G”
+    // æ•µæ•°
     // =====================================================
 
     /// <summary>
-    /// Wave‘S‘Ì‚Ì“G‘”B
+    /// Waveå…¨ä½“ã®æ•µç·æ•°ã€‚
     ///
-    /// —áF
+    /// ä¾‹ï¼š
     /// North 5
     /// South 5
     /// East 10
     /// West 0
     ///
-    /// ¨ 20
+    /// â†’ 20
     /// </summary>
     public int TotalEnemyCount
     {
@@ -139,7 +139,7 @@ public class WaveManager : MonoBehaviour
 
 
     /// <summary>
-    /// Œ»İc‚Á‚Ä‚¢‚é“G”B
+    /// ç¾åœ¨æ®‹ã£ã¦ã„ã‚‹æ•µæ•°ã€‚
     /// </summary>
     public int RemainingEnemyCount
     {
@@ -149,7 +149,7 @@ public class WaveManager : MonoBehaviour
 
 
     /// <summary>
-    /// Œ»İƒtƒB[ƒ‹ƒhã‚É‘¶İ‚·‚é“GB
+    /// ç¾åœ¨ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ä¸Šã«å­˜åœ¨ã™ã‚‹æ•µã€‚
     /// </summary>
     private readonly HashSet<Enemy> activeEnemies =
         new HashSet<Enemy>();
@@ -187,7 +187,7 @@ public class WaveManager : MonoBehaviour
     private void Start()
     {
         // -------------------------------------------------
-        // WaveŠJnƒ{ƒ^ƒ“
+        // Waveé–‹å§‹ãƒœã‚¿ãƒ³
         // -------------------------------------------------
 
         if (waveStartButton != null)
@@ -199,7 +199,7 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // Å‰‚Ìó‘Ô
+        // æœ€åˆã®çŠ¶æ…‹
         // -------------------------------------------------
 
         IsWaveRunning = false;
@@ -216,11 +216,11 @@ public class WaveManager : MonoBehaviour
         HideWaveClearText();
 
 
-        // Å‰‚ÍWave 1
+        // æœ€åˆã¯Wave 1
         ShowNextWaveText(1);
 
 
-        // WaveŠJnƒ{ƒ^ƒ“‚ğ•\¦
+        // Waveé–‹å§‹ãƒœã‚¿ãƒ³ã‚’è¡¨ç¤º
         ShowWaveStartButton();
     }
 
@@ -243,27 +243,27 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // WaveŠJn
+    // Waveé–‹å§‹
     // =====================================================
 
     /// <summary>
-    /// Œ»İ‚ÌWave‚ğŠJn‚·‚éB
+    /// ç¾åœ¨ã®Waveã‚’é–‹å§‹ã™ã‚‹ã€‚
     /// </summary>
     public void StartCurrentWave()
     {
-        // ‚·‚Å‚ÉWave’†‚È‚çŠJn‚µ‚È‚¢
+        // ã™ã§ã«Waveä¸­ãªã‚‰é–‹å§‹ã—ãªã„
         if (IsWaveRunning)
             return;
 
 
-        // WaveData‚ª‚È‚¢
+        // WaveDataãŒãªã„
         if (
             waves == null ||
             waves.Length == 0
         )
         {
             Debug.LogError(
-                "WaveManager: WaveData‚ªİ’è‚³‚ê‚Ä‚¢‚Ü‚¹‚ñB",
+                "WaveManager: WaveDataãŒè¨­å®šã•ã‚Œã¦ã„ã¾ã›ã‚“ã€‚",
                 this
             );
 
@@ -271,18 +271,18 @@ public class WaveManager : MonoBehaviour
         }
 
 
-        // Ÿ‚ÌWave‚Ö
+        // æ¬¡ã®Waveã¸
         currentWaveIndex++;
 
 
-        // ‘SWaveI—¹
+        // å…¨Waveçµ‚äº†
         if (
             currentWaveIndex >=
             waves.Length
         )
         {
             Debug.Log(
-                "‘SWaveI—¹‚µ‚Ü‚µ‚½B"
+                "å…¨Waveçµ‚äº†ã—ã¾ã—ãŸã€‚"
             );
 
             HideWaveStartButton();
@@ -298,7 +298,7 @@ public class WaveManager : MonoBehaviour
         if (wave == null)
         {
             Debug.LogError(
-                $"Wave {currentWaveIndex + 1} ‚ªnull‚Å‚·B",
+                $"Wave {currentWaveIndex + 1} ãŒnullã§ã™ã€‚",
                 this
             );
 
@@ -307,7 +307,7 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // “G”‚ğ‰Šú‰»
+        // æ•µæ•°ã‚’åˆæœŸåŒ–
         // -------------------------------------------------
 
         TotalEnemyCount =
@@ -318,7 +318,7 @@ public class WaveManager : MonoBehaviour
             TotalEnemyCount;
 
 
-        // ”O‚Ì‚½‚ß‘OWave‚Ì“Gî•ñ‚ğƒNƒŠƒA
+        // å¿µã®ãŸã‚å‰Waveã®æ•µæƒ…å ±ã‚’ã‚¯ãƒªã‚¢
         activeEnemies.Clear();
 
 
@@ -353,7 +353,7 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // Waveis
+    // Waveé€²è¡Œ
     // =====================================================
 
     private IEnumerator StartWaveCoroutine(
@@ -363,12 +363,12 @@ public class WaveManager : MonoBehaviour
 
 
         Debug.Log(
-            $"========== {wave.waveName} ŠJn =========="
+            $"========== {wave.waveName} é–‹å§‹ =========="
         );
 
 
         // -------------------------------------------------
-        // ŠJn‘O‘Ò‹@
+        // é–‹å§‹å‰å¾…æ©Ÿ
         // -------------------------------------------------
 
         if (wave.startDelay > 0f)
@@ -380,7 +380,7 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // Wave BGM‚ÖØ‚è‘Ö‚¦
+        // Wave BGMã¸åˆ‡ã‚Šæ›¿ãˆ
         // -------------------------------------------------
 
         if (AudioManager.Instance != null)
@@ -392,7 +392,7 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // WaveŠJnSE
+        // Waveé–‹å§‹SE
         // -------------------------------------------------
 
         if (AudioManager.Instance != null)
@@ -404,14 +404,14 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // SpawnerŠJn
+        // Spawneré–‹å§‹
         // -------------------------------------------------
 
         StartSpawners(wave);
 
 
         // -------------------------------------------------
-        // “GƒXƒ|[ƒ“I—¹‘Ò‚¿
+        // æ•µã‚¹ãƒãƒ¼ãƒ³çµ‚äº†å¾…ã¡
         // -------------------------------------------------
 
         yield return StartCoroutine(
@@ -420,7 +420,7 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // ‘S“GÁ–Å‘Ò‚¿
+        // å…¨æ•µæ¶ˆæ»…å¾…ã¡
         // -------------------------------------------------
 
         yield return StartCoroutine(
@@ -429,7 +429,7 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // WaveƒNƒŠƒA
+        // Waveã‚¯ãƒªã‚¢
         // -------------------------------------------------
 
         WaveCleared();
@@ -437,7 +437,7 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // SpawnerŠJn
+    // Spawneré–‹å§‹
     // =====================================================
 
     private void StartSpawners(
@@ -489,7 +489,7 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // ƒXƒ|[ƒ“I—¹‘Ò‚¿
+    // ã‚¹ãƒãƒ¼ãƒ³çµ‚äº†å¾…ã¡
     // =====================================================
 
     private IEnumerator WaitForSpawningFinished()
@@ -545,11 +545,11 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // “G“o˜^
+    // æ•µç™»éŒ²
     // =====================================================
 
     /// <summary>
-    /// V‚µ‚­“G‚ªoŒ»‚µ‚½‚Æ‚«‚É“o˜^‚·‚éB
+    /// æ–°ã—ãæ•µãŒå‡ºç¾ã—ãŸã¨ãã«ç™»éŒ²ã™ã‚‹ã€‚
     /// </summary>
     public void RegisterEnemy(
         Enemy enemy)
@@ -564,7 +564,7 @@ public class WaveManager : MonoBehaviour
 
 
         Debug.Log(
-            $"“GoŒ»BŒ»İ‚ÌƒtƒB[ƒ‹ƒh“G”F{activeEnemies.Count}"
+            $"æ•µå‡ºç¾ã€‚ç¾åœ¨ã®ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰æ•µæ•°ï¼š{activeEnemies.Count}"
         );
 
 
@@ -573,11 +573,11 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // “GÁ–Å
+    // æ•µæ¶ˆæ»…
     // =====================================================
 
     /// <summary>
-    /// “G‚ªŒ‚”j‚Ü‚½‚ÍƒRƒA“’B‚ÅÁ–Å‚µ‚½‚Æ‚«‚ÉŒÄ‚Î‚ê‚éB
+    /// æ•µãŒæ’ƒç ´ã¾ãŸã¯ã‚³ã‚¢åˆ°é”ã§æ¶ˆæ»…ã—ãŸã¨ãã«å‘¼ã°ã‚Œã‚‹ã€‚
     /// </summary>
     public void NotifyEnemyRemoved(
         Enemy enemy)
@@ -586,7 +586,7 @@ public class WaveManager : MonoBehaviour
             return;
 
 
-        // ‚·‚Å‚ÉíœÏ‚İ‚È‚ç‰½‚à‚µ‚È‚¢
+        // ã™ã§ã«å‰Šé™¤æ¸ˆã¿ãªã‚‰ä½•ã‚‚ã—ãªã„
         bool removed =
             activeEnemies.Remove(
                 enemy
@@ -597,7 +597,7 @@ public class WaveManager : MonoBehaviour
             return;
 
 
-        // c”‚ğ1Œ¸‚ç‚·
+        // æ®‹æ•°ã‚’1æ¸›ã‚‰ã™
         RemainingEnemyCount =
             Mathf.Max(
                 0,
@@ -606,30 +606,30 @@ public class WaveManager : MonoBehaviour
 
 
         Debug.Log(
-            $"“GÁ–ÅBc‚è“G”F{RemainingEnemyCount}/{TotalEnemyCount}"
+            $"æ•µæ¶ˆæ»…ã€‚æ®‹ã‚Šæ•µæ•°ï¼š{RemainingEnemyCount}/{TotalEnemyCount}"
         );
 
 
-        // UIXV
+        // UIæ›´æ–°
         UpdateEnemyCountUI();
     }
 
 
     // =====================================================
-    // ‘S“GÁ–Å‘Ò‚¿
+    // å…¨æ•µæ¶ˆæ»…å¾…ã¡
     // =====================================================
 
     private IEnumerator WaitForAllEnemiesDefeated()
     {
         while (true)
         {
-            // null‚É‚È‚Á‚½Enemy‚ğíœ
+            // nullã«ãªã£ãŸEnemyã‚’å‰Šé™¤
             activeEnemies.RemoveWhere(
                 enemy => enemy == null
             );
 
 
-            // ‘S“G‚ªÁ–Å
+            // å…¨æ•µãŒæ¶ˆæ»…
             if (
                 activeEnemies.Count == 0 &&
                 RemainingEnemyCount <= 0
@@ -645,7 +645,7 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // WaveƒNƒŠƒA
+    // Waveã‚¯ãƒªã‚¢
     // =====================================================
 
     private void WaveCleared()
@@ -659,7 +659,7 @@ public class WaveManager : MonoBehaviour
 
 
         // =================================================
-        // ŠJn‘OBGM‚Ö–ß‚·
+        // é–‹å§‹å‰BGMã¸æˆ»ã™
         // =================================================
 
         if (AudioManager.Instance != null)
@@ -671,7 +671,7 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // WaveƒNƒŠƒA•\¦
+        // Waveã‚¯ãƒªã‚¢è¡¨ç¤º
         // -------------------------------------------------
 
         ShowWaveClearText(
@@ -680,7 +680,7 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // WaveText‚ğÁ‚·
+        // WaveTextã‚’æ¶ˆã™
         // -------------------------------------------------
 
         HideWaveText();
@@ -689,7 +689,7 @@ public class WaveManager : MonoBehaviour
 
 
         // -------------------------------------------------
-        // ŸWave‚ª‚ ‚é‚©
+        // æ¬¡WaveãŒã‚ã‚‹ã‹
         // -------------------------------------------------
 
         if (
@@ -697,13 +697,13 @@ public class WaveManager : MonoBehaviour
             waves.Length - 1
         )
         {
-            // ŸWave”Ô†
+            // æ¬¡Waveç•ªå·
             int nextWave =
                 CurrentWave + 1;
 
 
-            // endDelayŒã‚ÉŸWaveƒ{ƒ^ƒ“‚Æ
-            // uŸ‚ÍWave Xv‚ğ•\¦
+            // endDelayå¾Œã«æ¬¡Waveãƒœã‚¿ãƒ³ã¨
+            // ã€Œæ¬¡ã¯Wave Xã€ã‚’è¡¨ç¤º
             StartCoroutine(
                 ShowNextWaveAfterDelay(
                     nextWave
@@ -712,14 +712,14 @@ public class WaveManager : MonoBehaviour
         }
         else
         {
-            // ‘SWaveƒNƒŠƒA
+            // å…¨Waveã‚¯ãƒªã‚¢
             Debug.Log(
                 "========== GAME CLEAR =========="
             );
 
 
             // =================================================
-            // BGM’â~
+            // BGMåœæ­¢
             // =================================================
 
             if (AudioManager.Instance != null)
@@ -729,7 +729,7 @@ public class WaveManager : MonoBehaviour
 
 
             // =================================================
-            // ƒQ[ƒ€ƒNƒŠƒASE
+            // ã‚²ãƒ¼ãƒ ã‚¯ãƒªã‚¢SE
             // =================================================
 
             if (AudioManager.Instance != null)
@@ -744,7 +744,7 @@ public class WaveManager : MonoBehaviour
             HideNextWaveText();
 
 
-            // ClearScene‚ÖˆÚ“®
+            // ClearSceneã¸ç§»å‹•
             if (SceneController.Instance != null)
             {
                 SceneController.Instance.LoadClear();
@@ -752,7 +752,7 @@ public class WaveManager : MonoBehaviour
             else
             {
                 Debug.LogError(
-                    "WaveManager: SceneController.Instance ‚ªŒ©‚Â‚©‚è‚Ü‚¹‚ñB"
+                    "WaveManager: SceneController.Instance ãŒè¦‹ã¤ã‹ã‚Šã¾ã›ã‚“ã€‚"
                 );
             }
         }
@@ -763,7 +763,7 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // ŸWave•\¦
+    // æ¬¡Waveè¡¨ç¤º
     // =====================================================
 
     private IEnumerator ShowNextWaveAfterDelay(
@@ -800,13 +800,13 @@ public class WaveManager : MonoBehaviour
         }
 
 
-        // ŸWave•\¦
+        // æ¬¡Waveè¡¨ç¤º
         ShowNextWaveText(
             nextWave
         );
 
 
-        // ŠJnƒ{ƒ^ƒ“•\¦
+        // é–‹å§‹ãƒœã‚¿ãƒ³è¡¨ç¤º
         ShowWaveStartButton();
     }
 
@@ -816,7 +816,7 @@ public class WaveManager : MonoBehaviour
     // =====================================================
 
     /// <summary>
-    /// Wave”Ô†‚ğ•\¦B
+    /// Waveç•ªå·ã‚’è¡¨ç¤ºã€‚
     /// </summary>
     private void ShowWaveText(
         int waveNumber)
@@ -836,7 +836,7 @@ public class WaveManager : MonoBehaviour
 
 
     /// <summary>
-    /// Wave”Ô†‚ğ”ñ•\¦B
+    /// Waveç•ªå·ã‚’éè¡¨ç¤ºã€‚
     /// </summary>
     private void HideWaveText()
     {
@@ -851,11 +851,11 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // “G”UI
+    // æ•µæ•°UI
     // =====================================================
 
     /// <summary>
-    /// “G”UI‚ğ•\¦B
+    /// æ•µæ•°UIã‚’è¡¨ç¤ºã€‚
     /// </summary>
     private void ShowEnemyCountText()
     {
@@ -873,10 +873,10 @@ public class WaveManager : MonoBehaviour
 
 
     /// <summary>
-    /// “G”UI‚ğXVB
+    /// æ•µæ•°UIã‚’æ›´æ–°ã€‚
     ///
-    /// —áF
-    /// “G 5 / 20
+    /// ä¾‹ï¼š
+    /// æ•µ 5 / 20
     /// </summary>
     private void UpdateEnemyCountUI()
     {
@@ -885,12 +885,12 @@ public class WaveManager : MonoBehaviour
 
 
         enemyCountText.text =
-            $"“G {RemainingEnemyCount} / {TotalEnemyCount}";
+            $"æ•µ {RemainingEnemyCount} / {TotalEnemyCount}";
     }
 
 
     /// <summary>
-    /// “G”UI‚ğ”ñ•\¦B
+    /// æ•µæ•°UIã‚’éè¡¨ç¤ºã€‚
     /// </summary>
     private void HideEnemyCountText()
     {
@@ -905,7 +905,7 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // WaveƒNƒŠƒAUI
+    // Waveã‚¯ãƒªã‚¢UI
     // =====================================================
 
     private void ShowWaveClearText(
@@ -969,7 +969,7 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // ŸWave UI
+    // æ¬¡Wave UI
     // =====================================================
 
     private void ShowNextWaveText(
@@ -979,8 +979,45 @@ public class WaveManager : MonoBehaviour
             return;
 
 
+        // æ¬¡ã®Waveã®WaveDataã‚’å–å¾—
+        int waveIndex = waveNumber - 1;
+
+
+        if (
+            waves == null ||
+            waveIndex < 0 ||
+            waveIndex >= waves.Length
+        )
+        {
+            return;
+        }
+
+
+        WaveData nextWave =
+            waves[waveIndex];
+
+
+        if (nextWave == null)
+        {
+            return;
+        }
+
+
+        // =================================================
+        // æ•µãŒå‡ºç¾ã™ã‚‹æ–¹å‘ã‚’å–å¾—
+        // =================================================
+
+        string dangerDirection =
+            GetDangerDirection(nextWave);
+
+
+        // =================================================
+        // UIè¡¨ç¤º
+        // =================================================
+
         nextWaveText.text =
-            $"Ÿ‚Í Wave {waveNumber}";
+            $"æ¬¡ã¯ Wave {waveNumber}\n" +
+            $"âš {dangerDirection}";
 
 
         nextWaveText.gameObject.SetActive(
@@ -1001,8 +1038,90 @@ public class WaveManager : MonoBehaviour
     }
 
 
+    /// <summary>
+    /// Waveã§æ•µãŒå‡ºç¾ã™ã‚‹æ–¹å‘ã‚’å–å¾—ã™ã‚‹ã€‚
+    /// </summary>
+    private string GetDangerDirection(
+        WaveData wave)
+    {
+        if (wave == null)
+            return "";
+
+
+        // =================================================
+        // å…¨æ–¹å‘
+        // =================================================
+
+        if (
+            wave.useNorth &&
+            wave.useSouth &&
+            wave.useEast &&
+            wave.useWest
+        )
+        {
+            return "å…¨æ–¹å‘ãŒå±é™ºï¼";
+        }
+
+
+        // =================================================
+        // å€‹åˆ¥ã®æ–¹å‘
+        // =================================================
+
+        List<string> directions =
+            new List<string>();
+
+
+        if (wave.useNorth)
+        {
+            directions.Add("ä¸Š");
+        }
+
+
+        if (wave.useSouth)
+        {
+            directions.Add("ä¸‹");
+        }
+
+
+        if (wave.useEast)
+        {
+            directions.Add("å³");
+        }
+
+
+        if (wave.useWest)
+        {
+            directions.Add("å·¦");
+        }
+
+
+        // =================================================
+        // æ–¹å‘ãŒ1ã¤ã‚‚ãªã„å ´åˆ
+        // =================================================
+
+        if (directions.Count == 0)
+        {
+            return "å‡ºç¾æ–¹å‘ãªã—";
+        }
+
+
+        // =================================================
+        // æ–¹å‘ã‚’ã€Œãƒ»ã€ã§ã¤ãªã
+        // =================================================
+
+        string directionText =
+            string.Join(
+                "ãƒ»",
+                directions
+            );
+
+
+        return $"{directionText}æ–¹å‘ãŒå±é™ºï¼";
+    }
+
+
     // =====================================================
-    // WaveŠJnƒ{ƒ^ƒ“
+    // Waveé–‹å§‹ãƒœã‚¿ãƒ³
     // =====================================================
 
     private void ShowWaveStartButton()
@@ -1040,7 +1159,7 @@ public class WaveManager : MonoBehaviour
 
 
     // =====================================================
-    // ‹­§’â~
+    // å¼·åˆ¶åœæ­¢
     // =====================================================
 
     public void StopAllWaves()
